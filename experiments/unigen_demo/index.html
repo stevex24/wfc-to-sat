@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>UniGen Sampling Demo</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
+    background: #f5f5f5;
+}
+
+h1,h2 {
+    color:#204060;
+}
+
+table {
+    border-collapse: collapse;
+    margin-bottom:40px;
+}
+
+td {
+    border:1px solid #999;
+    padding:8px;
+    background:white;
+    text-align:center;
+}
+
+img {
+    width:180px;
+    image-rendering:pixelated;
+}
+
+.caption {
+    font-size:14px;
+    margin-top:6px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>UniGen SAT Sampling Demo</h1>
+
+<p>
+SAT instances generated from overlapping-pattern constraints.
+UniGen was used to generate multiple satisfying assignments,
+which were decoded back into images.
+</p>
+
+<h2>Chess (Pattern Width 2)</h2>
+
+<table>
+<tr>
+<td><img src="Chess/sample_01_big.png"><div class="caption">Sample 1</div></td>
+<td><img src="Chess/sample_02_big.png"><div class="caption">Sample 2</div></td>
+<td><img src="Chess/sample_03_big.png"><div class="caption">Sample 3</div></td>
+<td><img src="Chess/sample_04_big.png"><div class="caption">Sample 4</div></td>
+</tr>
+
+<tr>
+<td><img src="Chess/sample_05_big.png"><div class="caption">Sample 5</div></td>
+<td><img src="Chess/sample_06_big.png"><div class="caption">Sample 6</div></td>
+<td><img src="Chess/sample_07_big.png"><div class="caption">Sample 7</div></td>
+<td></td>
+</tr>
+</table>
+
+<h2>Simple Wall (Pattern Width 1)</h2>
+
+<table>
+
+<tr>
+<td><img src="../unigen_simple_wall_pw1_out/sample_01_big.png"><div class="caption">Sample 1</div></td>
+<td><img src="../unigen_simple_wall_pw1_out/sample_02_big.png"><div class="caption">Sample 2</div></td>
+<td><img src="../unigen_simple_wall_pw1_out/sample_03_big.png"><div class="caption">Sample 3</div></td>
+<td><img src="../unigen_simple_wall_pw1_out/sample_04_big.png"><div class="caption">Sample 4</div></td>
+<td><img src="../unigen_simple_wall_pw1_out/sample_05_big.png"><div class="caption">Sample 5</div></td>
+</tr>
+
+</table>
+
+<p>
+<b>Observation.</b>
+UniGen rapidly produces multiple legal SAT solutions exhibiting
+substantial diversity. Since sampling is presently uniform over satisfying
+assignments rather than weighted by pattern frequencies, visual fidelity to
+the original benchmark is expected to be lower than weighted approaches such
+as WAPS.
+</p>
+
+</body>
+</html>
