@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CDCL Domain Visualizer</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header>
+    <div><span class="eyebrow">SAT SEARCH</span><h1>CDCL Domain Visualizer</h1></div>
+    <div id="status">Loading traces…</div>
+  </header>
+  <main>
+    <canvas id="board" width="1280" height="720"></canvas>
+    <section class="controls">
+      <div class="transport">
+        <button id="back" title="Step backward">◀</button>
+        <button id="play">Play</button>
+        <button id="forward" title="Step forward">▶</button>
+        <input id="scrub" type="range" min="0" max="1000" value="0">
+      </div>
+      <div class="settings">
+        <label>View <select id="view"><option value="blend">Superposition</option><option value="entropy">Entropy</option><option value="collapsed">Collapsed only</option></select></label>
+        <label>Events/frame <input id="epf" type="number" min="1" max="100000" value="1"></label>
+        <label>FPS <input id="fps" type="range" min="1" max="60" value="30"><output id="fpsValue">30</output></label>
+        <button id="png">Save PNG</button>
+        <button id="sequence" hidden>Export sequence</button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/assets/player.js"></script>
+</body>
+</html>

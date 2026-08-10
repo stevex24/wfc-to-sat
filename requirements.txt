@@ -1,0 +1,2 @@
+Pillow
+python-sat==1.9.dev5
