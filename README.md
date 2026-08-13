@@ -145,15 +145,32 @@ Expected outputs:
 
 This repository is under active development.
 
-The current prototype implementation exists in:
+## SAT vs WFC Comparison
 
-```text
-wfc-to-sat-demo
+`compare_sat_wfc.sh` compares SAT/CDCL and WFC searches on an input image.
+Install the dependencies, then pass it a PNG:
+
+```bash
+python3 -m pip install -r requirements.txt
+./compare_sat_wfc.sh path/to/image.png
 ```
 
-The purpose of this repository is to provide a clean, modular compiler suitable for research and eventual publication.
+For a reproducible checked-in example:
 
----
+```bash
+./compare_sat_wfc.sh examples/simple-knot.png
+```
+
+Other supplied examples are `examples/cat.png`, `examples/chess.png`,
+`examples/knot.png`, `examples/simple-maze.png`, and
+`examples/simple-wall.png`.
+
+The current defaults use pattern size N=3 and an 8x8 placement grid. Beside
+the input image, the script generates a DIMACS CNF, a JSON mapping, and two
+gzip-compressed JSONL traces, all prefixed `<image-stem>-n3-8x8`. It then
+launches `play_trace.py` with the SAT/CDCL and WFC traces for side-by-side
+visualization. Set `COMPARE_SAT_WFC_NO_PLAYER=1` to generate the files without
+launching the visualizer.
 
 ## Future Work
 
@@ -174,4 +191,3 @@ The purpose of this repository is to provide a clean, modular compiler suitable 
 Steve Cross
 
 Research project exploring the compilation of Wave Function Collapse constraints into SAT formulations for procedural content generation.
-
