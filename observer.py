@@ -56,6 +56,9 @@ class DomainObserver(Propagator):
         self.domains = [self.full_domain] * self.cell_count
         self.selected: list[int | None] = [None] * self.cell_count
         self.current_level = 0
+        self.backtrack_events = 0
+        self.restart_events = 0
+        self.undone_assignments = 0
         self.trails: list[list[tuple[int, int, int | None]]] = [[]]
         self.var_info: dict[int, tuple[int, int, int, int]] = {}
         self.var_for_cell_pattern: dict[tuple[int, int], int] = {}
@@ -101,8 +104,11 @@ class DomainObserver(Propagator):
                 undone += 1
             self.trails[level].clear()
         self.current_level = to
+        self.backtrack_events += 1
+        self.undone_assignments += undone
         self.emit(["b", to, undone])
         if to == 0:
+            self.restart_events += 1
             self.emit(["r", undone])
 
     def check_model(self, model: list[int]) -> bool:
