@@ -11,7 +11,7 @@ from typing import Iterable
 
 from wfc_to_sat.cnf import patterns_to_cnf
 from wfc_to_sat.compatibility import build_compatibility
-from wfc_to_sat.patterns import extract_patterns_from_image
+from wfc_to_sat.patterns import extract_pattern_occurrence_grid, load_image_grid
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,7 +36,8 @@ def export_instance(
     if width <= 0 or height <= 0:
         raise ValueError("output dimensions must be positive")
 
-    patterns = extract_patterns_from_image(image, pattern_size)
+    source_grid = load_image_grid(image)
+    patterns, source_pattern_grid = extract_pattern_occurrence_grid(source_grid, pattern_size)
     if not patterns:
         raise ValueError("pattern size is larger than the source image")
 
@@ -50,6 +51,7 @@ def export_instance(
     cnf_path.write_text(cnf.dimacs(), encoding="ascii")
 
     mapping = {
+        "mapping_version": 2,
         "grid": {"width": width, "height": height},
         "patterns": [
             {
@@ -83,6 +85,11 @@ def export_instance(
                 for pattern_id, compatible_patterns in table.items()
             }
             for direction, table in allowed.items()
+        },
+        "context_data": {
+            "kind": "source-pattern-occurrences",
+            "boundary": "unknown",
+            "grid": [list(row) for row in source_pattern_grid],
         },
     }
     mapping_path.write_text(json.dumps(mapping, indent=2) + "\n", encoding="utf-8")

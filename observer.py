@@ -13,6 +13,7 @@ except ImportError:  # Keep pure state tests runnable before optional solver ins
         pass
 
 from trace_format import MappingSpec
+from wfc_to_sat.context_frequency import Context, ContextFrequencies, UNK
 
 
 Emit = Callable[[object], None]
@@ -27,17 +28,29 @@ class DomainObserver(Propagator):
         emit: Emit,
         heuristic: str = "solver",
         seed: int = 0,
+        selection: str = "min_entropy",
     ) -> None:
         super().__init__()
-        if heuristic not in {"solver", "wfc"}:
+        if heuristic not in {"solver", "wfc", "uniform", "frequency", "context"}:
             raise ValueError(f"unknown heuristic {heuristic!r}")
+        if selection not in {"min_entropy", "lexical"}:
+            raise ValueError(f"unknown selection heuristic {selection!r}")
         self.mapping = mapping
         self.emit = emit
         self.heuristic = heuristic
+        self.decision_heuristic = "frequency" if heuristic == "wfc" else heuristic
+        self.selection_heuristic = selection
         self.random = random.Random(seed)
         self.pattern_ids = tuple(item.id for item in mapping.patterns)
         self.pattern_index = {pattern_id: i for i, pattern_id in enumerate(self.pattern_ids)}
         self.weights = tuple(item.frequency for item in mapping.patterns)
+        self.context_frequencies = (
+            ContextFrequencies(mapping.source_pattern_grid)
+            if mapping.source_pattern_grid is not None
+            else None
+        )
+        if self.decision_heuristic == "context" and self.context_frequencies is None:
+            raise ValueError("context heuristic requires mapping context_data")
         self.full_domain = (1 << len(self.pattern_ids)) - 1
         self.cell_count = mapping.width * mapping.height
         self.domains = [self.full_domain] * self.cell_count
@@ -111,13 +124,47 @@ class DomainObserver(Propagator):
             size = _bit_count(domain)
             if size <= 1 or self.selected[cell] is not None:
                 continue
-            candidates.append((size, self._entropy(domain), self.random.random(), cell))
+            if self.selection_heuristic == "lexical":
+                candidates.append((0, 0.0, 0.0, cell))
+            else:
+                candidates.append((size, self._entropy(domain), self.random.random(), cell))
         if not candidates:
             return 0
         _, _, _, cell = min(candidates)
         indexes = [index for index in range(len(self.pattern_ids)) if self.domains[cell] & (1 << index)]
-        chosen = self.random.choices(indexes, weights=[self.weights[index] for index in indexes], k=1)[0]
+        weights = self.decision_weights(cell, indexes)
+        chosen = self.random.choices(indexes, weights=weights, k=1)[0]
         return self.var_for_cell_pattern[(cell, chosen)]
+
+    def decision_weights(self, cell: int, indexes: Iterable[int] | None = None) -> tuple[int, ...]:
+        """Weights for currently legal candidates at ``cell``."""
+        options = tuple(
+            indexes if indexes is not None else
+            (index for index in range(len(self.pattern_ids)) if self.domains[cell] & (1 << index))
+        )
+        if self.decision_heuristic == "uniform":
+            return (1,) * len(options)
+        if self.decision_heuristic in {"frequency", "solver"}:
+            return tuple(self.weights[index] for index in options)
+        contexts = self.context_frequencies
+        assert contexts is not None
+        ids = tuple(self.pattern_ids[index] for index in options)
+        return contexts.candidate_weights(ids, self.context_at_cell(cell)).weights
+
+    def context_at(self, x: int, y: int) -> Context:
+        return self.context_at_cell(y * self.mapping.width + x)
+
+    def context_at_cell(self, cell: int) -> Context:
+        x, y = cell % self.mapping.width, cell // self.mapping.width
+        values = []
+        for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+            nx, ny = x + dx, y + dy
+            if not (0 <= nx < self.mapping.width and 0 <= ny < self.mapping.height):
+                values.append(UNK)
+                continue
+            ids = self.domain_ids(nx, ny)
+            values.append(ids[0] if len(ids) == 1 else UNK)
+        return (values[0], values[1], values[2], values[3])
 
     def propagate(self) -> list[int]:
         return []

@@ -64,8 +64,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("cnf", type=Path)
     parser.add_argument("--mapping", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--heuristic", choices=("wfc", "solver"), default="solver")
+    parser.add_argument(
+        "--heuristic",
+        choices=("wfc", "solver", "uniform", "frequency", "context"),
+        default="solver",
+    )
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--selection", choices=("min_entropy", "lexical"), default="min_entropy")
     parser.add_argument("--solver", choices=("cadical195",), default="cadical195")
     parser.add_argument("--watchable", action="store_true", help="use a longer restart interval")
     parser.add_argument("--cadical-option", action="append", default=[], type=parse_option, metavar="NAME=VALUE")
@@ -91,6 +96,7 @@ def solve(args: argparse.Namespace) -> bool:
             "cnf": args.cnf.name,
             "mapping": args.mapping.name,
             "heuristic": args.heuristic,
+            "selection": args.selection,
             "seed": args.seed,
             "solver": args.solver,
             "pysat_version": getattr(pysat, "__version__", "unknown"),
@@ -98,7 +104,10 @@ def solve(args: argparse.Namespace) -> bool:
             "cadical_options": options,
         }
         writer.write(mapping.header(run))
-        observer = DomainObserver(mapping, writer.write, heuristic=args.heuristic, seed=args.seed)
+        observer = DomainObserver(
+            mapping, writer.write, heuristic=args.heuristic, seed=args.seed,
+            selection=args.selection,
+        )
         try:
             with Cadical195(bootstrap_with=clauses, use_timer=True) as solver:
                 required = ("connect_propagator", "observe", "configure", "accum_stats")

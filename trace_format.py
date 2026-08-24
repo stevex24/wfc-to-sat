@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from collections import Counter
 from dataclasses import dataclass
 import gzip
 import json
@@ -11,6 +12,7 @@ from typing import Any, Iterable, Iterator, TextIO
 
 
 TRACE_VERSION = 1
+MAPPING_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -67,6 +69,7 @@ class MappingSpec:
     patterns: tuple[PatternSpec, ...]
     placements: tuple[Placement, ...]
     compatibility: dict[str, dict[int, tuple[int, ...]]] | None = None
+    source_pattern_grid: tuple[tuple[int, ...], ...] | None = None
 
     @classmethod
     def load(cls, path: str | Path, num_vars: int | None = None) -> "MappingSpec":
@@ -82,8 +85,14 @@ class MappingSpec:
             )
         except (KeyError, TypeError, ValueError) as error:
             raise ValueError("mapping sidecar has an invalid shape") from error
+        version = int(value.get("mapping_version", 1))
+        if version not in (1, MAPPING_VERSION):
+            raise ValueError(f"unsupported mapping version {version}")
+        if value.get("context_data") is not None and version != MAPPING_VERSION:
+            raise ValueError("context_data requires mapping version 2")
         compatibility = _parse_compatibility(value.get("compatibility"))
-        result = cls(width, height, patterns, placements, compatibility)
+        source_pattern_grid = _parse_source_pattern_grid(value.get("context_data"))
+        result = cls(width, height, patterns, placements, compatibility, source_pattern_grid)
         result.validate(num_vars=num_vars)
         return result
 
@@ -125,6 +134,18 @@ class MappingSpec:
                 for pattern_id, compatible in table.items():
                     if not set(compatible) <= id_set:
                         raise ValueError(f"compatibility.{direction}.{pattern_id} references an unknown pattern")
+        if self.source_pattern_grid is not None:
+            if not self.source_pattern_grid or not self.source_pattern_grid[0]:
+                raise ValueError("source pattern grid must be nonempty")
+            source_width = len(self.source_pattern_grid[0])
+            if any(len(row) != source_width for row in self.source_pattern_grid):
+                raise ValueError("source pattern grid must be rectangular")
+            if any(item not in id_set for row in self.source_pattern_grid for item in row):
+                raise ValueError("source pattern grid references an unknown pattern")
+            counts = Counter(item for row in self.source_pattern_grid for item in row)
+            frequencies = {pattern.id: pattern.frequency for pattern in self.patterns}
+            if counts != frequencies:
+                raise ValueError("source pattern occurrences must match pattern frequencies")
 
     def header(self, run: dict[str, Any]) -> dict[str, Any]:
         value: dict[str, Any] = {
@@ -143,6 +164,26 @@ class MappingSpec:
                 direction: {str(key): list(items) for key, items in table.items()}
                 for direction, table in self.compatibility.items()
             }
+        if self.source_pattern_grid is not None:
+            value["mapping_version"] = MAPPING_VERSION
+            value["context_data"] = {
+                "kind": "source-pattern-occurrences",
+                "boundary": "unknown",
+                "grid": [list(row) for row in self.source_pattern_grid],
+            }
+        return value
+
+    def to_json(self) -> dict[str, Any]:
+        """Return the validated, versioned mapping sidecar representation."""
+        value = self.header({})
+        value.pop("type")
+        value.pop("version")
+        value.pop("run")
+        value.pop("capabilities")
+        value["variables"] = [
+            {"var": item.var, "x": item.x, "y": item.y, "pattern_id": item.pattern_id}
+            for item in self.placements
+        ]
         return value
 
 
@@ -158,6 +199,22 @@ def _parse_compatibility(value: Any) -> dict[str, dict[int, tuple[int, ...]]] | 
             raise ValueError(f"compatibility.{direction} must be an object")
         result[direction] = {int(key): tuple(int(item) for item in items) for key, items in table.items()}
     return result
+
+
+def _parse_source_pattern_grid(value: Any) -> tuple[tuple[int, ...], ...] | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict) or value.get("kind") != "source-pattern-occurrences":
+        raise ValueError("context_data must contain source pattern occurrences")
+    if value.get("boundary") != "unknown":
+        raise ValueError("context_data boundary must be 'unknown'")
+    grid = value.get("grid")
+    if not isinstance(grid, list) or not all(isinstance(row, list) for row in grid):
+        raise ValueError("context_data.grid must be an array of arrays")
+    try:
+        return tuple(tuple(int(item) for item in row) for row in grid)
+    except (TypeError, ValueError) as error:
+        raise ValueError("context_data.grid contains a non-integer pattern ID") from error
 
 
 def open_trace(path: str | Path, mode: str) -> TextIO:

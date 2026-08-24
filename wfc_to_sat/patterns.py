@@ -44,6 +44,31 @@ def extract_patterns(text_grid: list[str], pattern_size: int):
     return patterns
 
 
+def extract_pattern_occurrence_grid(text_grid, pattern_size: int, patterns=None):
+    """Return unique patterns and the source grid of their occurrence IDs.
+
+    The occurrence grid has one cell per valid top-left pattern position and
+    intentionally uses the same non-wrapped extraction semantics as
+    :func:`extract_patterns`.
+    """
+    if patterns is None:
+        patterns = extract_patterns(text_grid, pattern_size)
+    ids = {pattern.rows: pattern.id for pattern in patterns}
+    height = len(text_grid)
+    width = len(text_grid[0])
+    occurrences = []
+    for y in range(height - pattern_size + 1):
+        row = []
+        for x in range(width - pattern_size + 1):
+            rows = tuple(
+                _hashable_slice(text_grid[y + dy], x, x + pattern_size)
+                for dy in range(pattern_size)
+            )
+            row.append(ids[rows])
+        occurrences.append(tuple(row))
+    return patterns, tuple(occurrences)
+
+
 def _hashable_slice(row, start, stop):
     """Preserve text rows and make other cell sequences hashable."""
     segment = row[start:stop]
