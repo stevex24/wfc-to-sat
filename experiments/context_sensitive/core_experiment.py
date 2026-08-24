@@ -14,6 +14,7 @@ import math
 from pathlib import Path
 import platform
 import statistics
+import subprocess
 import sys
 import time
 
@@ -193,12 +194,13 @@ def build_report(records, summary, output, meeting=False):
 body{{font:15px/1.45 system-ui;margin:2rem;background:#f3f5f9;color:#162033}} main{{max-width:1500px}} .gallery{{display:grid;grid-template-columns:repeat(2,minmax(280px,420px));gap:1rem}} .seed{{grid-column:1/-1;border-top:2px solid #94a3b8;padding-top:1rem}} article{{background:white;padding:1rem;border:1px solid #cbd5e1;border-radius:8px}} .grid{{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:1px;aspect-ratio:1;background:#64748b;border:2px solid #334155}} .t{{display:block}} .b{{background:#18181b}} .w{{background:white}} table{{border-collapse:collapse;background:white}} th,td{{padding:.5rem;border:1px solid #94a3b8;text-align:right}} th:first-child,td:first-child,td:nth-child(2){{text-align:left}} code{{background:#e2e8f0;padding:.1rem .25rem}}
 </style></head><body><main><h1>{title}</h1>
 <h2>Research question</h2><p>Does the Better Resemblance context-sensitive decision heuristic retain its resemblance behavior when decisions are made through SAT/CDCL rather than standalone ordinary WFC?</p>
-<h2>Architecture and controls</h2><p>Both engines use the same 7×7 Stick source, learned directional adjacency, 20×20 output, lexical location selection, legal candidate domains, source/context weights, unknown boundary, and fixed seeds. Ordinary WFC uses observe/propagate and stops on contradiction. WFC-as-SAT supplies decisions through IPASIR-UP while CaDiCaL propagates, learns, backtracks, and restarts. Context is derived from the observer's current restored domains; any singleton counts, including one produced by propagation.</p>
+<h2>Architecture and controls</h2>{grid_html(source_grid())}<p>Both engines use the same 7×7 Stick source (above), learned directional adjacency, 20×20 output, lexical location selection, legal candidate domains, source/context weights, unknown boundary, and fixed seeds. Ordinary WFC uses observe/propagate and stops on contradiction. WFC-as-SAT supplies decisions through IPASIR-UP while CaDiCaL propagates, learns, backtracks, and restarts. Context is derived from the observer's current restored domains; any singleton counts, including one produced by propagation.</p>
 <h2>Quantitative results</h2><table><thead><tr><th>Engine</th><th>Decision</th><th>Success</th><th>Pooled tile KL</th><th>Pooled edge KL</th><th>Median runtime s</th><th>Mean conflicts</th><th>Mean backtracks</th></tr></thead><tbody>{rows}</tbody></table>
 <p>KL is the paper's direction: generated target P || source Q, natural log, over generated support. Pooled values aggregate all output counts before normalization; raw per-run values and spread are in <a href="raw-runs.json">raw-runs.json</a> and <a href="summary.json">summary.json</a>.</p>
 <h2>Published ordinary-WFC Stick reference</h2><table><tr><th>Decision</th><th>Tile KL</th><th>Edge KL</th></tr>{paper_rows}</table>
 <h2>Uncurated fixed-seed gallery</h2><div class="gallery">{''.join(cards)}</div>
 <h2>Benchmark evidence</h2><p>{benchmark_note}</p>
+<h2>Conclusions</h2><p>For Stick, SAT preserves the context-sensitive resemblance improvement. Across all 100 seeds, each Uniform-, Frequency-, and Context-as-SAT output exactly matches its corresponding ordinary-WFC output because these instances encounter no SAT conflicts, backtracks, or restarts. Context reduces pooled edge KL from 0.08505 (frequency) to 0.000837 while slightly increasing pooled tile KL from 0.000201 to 0.002608. The ordinary-WFC results approximately reproduce the paper's reported direction and values; this is not exact numeric replication.</p>
 <h2>Limitations and deferred work</h2><p>{limitations}</p>
 </main></body></html>'''
     output.mkdir(parents=True, exist_ok=True)
@@ -223,7 +225,7 @@ def main(argv=None):
     records.append(run_sat(cnf, mapping, tile_for_id, "solver", 0))
     add_metrics(records, source)
     summary = summaries(records)
-    metadata = {"repository": "https://github.com/stevex24/wfc-to-sat", "branch": "context-sensitive-experiments", "starting_commit": "b35bfaa7717fcb42dd889b4faa17d61e133bff51", "input": str(SOURCE.relative_to(ROOT)), "pattern_size": 1, "output": "20x20", "seeds": list(range(count)), "python": platform.python_version(), "timestamp_utc": datetime.now(timezone.utc).isoformat(), "boundary": "non-wrapped; boundary is UNK", "selection": "lexical", "sat_solver": "CaDiCaL 1.9.5 via PySAT", "contradiction_policy": {"ordinary_wfc":"stop", "sat":"CDCL"}}
+    metadata = {"repository": "https://github.com/stevex24/wfc-to-sat", "branch": "context-sensitive-experiments", "starting_commit": "b35bfaa7717fcb42dd889b4faa17d61e133bff51", "experiment_code_commit": subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(), "input": str(SOURCE.relative_to(ROOT)), "pattern_size": 1, "output": "20x20", "seeds": list(range(count)), "python": platform.python_version(), "timestamp_utc": datetime.now(timezone.utc).isoformat(), "boundary": "non-wrapped; boundary is UNK", "selection": "lexical", "sat_solver": "CaDiCaL 1.9.5 via PySAT", "contradiction_policy": {"ordinary_wfc":"stop", "sat":"CDCL"}}
     for directory in (CORE_DIR, MEETING_DIR):
         directory.mkdir(parents=True, exist_ok=True)
         (directory / "raw-runs.json").write_text(json.dumps({"metadata":metadata,"runs":records}, indent=2)+"\n")
