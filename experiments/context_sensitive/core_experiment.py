@@ -129,6 +129,11 @@ def distribution(rows, edge=False):
 
 
 def kl_target_source(target, source):
+    # The established convention has no smoothing: target mass outside source
+    # support has infinite divergence. Existing experiment inputs stayed within
+    # source support, so making this case explicit does not change their values.
+    if any(source.get(key, 0.0) == 0.0 for key in target):
+        return math.inf
     return sum(probability * math.log(probability / source[key]) for key, probability in target.items())
 
 

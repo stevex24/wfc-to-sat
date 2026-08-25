@@ -1,0 +1,1076 @@
+{
+  "metadata": {
+    "generated_utc": "2026-08-25T04:10:05.681309+00:00",
+    "lags_requested": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "kl": "generated P || source Q; natural log; no smoothing; generated mass outside source support is infinity",
+    "pairs": "ordered; axes separate; non-wrapped; valid in-bounds origins only",
+    "stick_study_type": "100-run pooled distribution study",
+    "stick_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99
+    ],
+    "benchmark_study_type": "representative single-seed",
+    "benchmark_seeds": [
+      0
+    ],
+    "analysis_seconds": 0.44022356099999993
+  },
+  "validation": {
+    "stick_wfc_sat_outputs_identical": true,
+    "lag1_combined_distribution_equals_existing_oriented_edge_distribution": true
+  },
+  "stick": [
+    {
+      "label": "uniform \u2014 ordinary WFC",
+      "sample_count": 100,
+      "horizontal": [
+        {
+          "lag": 1,
+          "kl": 0.4095680395870969
+        },
+        {
+          "lag": 2,
+          "kl": Infinity
+        },
+        {
+          "lag": 4,
+          "kl": Infinity
+        }
+      ],
+      "vertical": [
+        {
+          "lag": 1,
+          "kl": 0.7238669297039511
+        },
+        {
+          "lag": 2,
+          "kl": 0.6547830455537609
+        },
+        {
+          "lag": 4,
+          "kl": 0.49291557065270375
+        }
+      ]
+    },
+    {
+      "label": "uniform \u2014 WFC-as-SAT",
+      "sample_count": 100,
+      "horizontal": [
+        {
+          "lag": 1,
+          "kl": 0.4095680395870969
+        },
+        {
+          "lag": 2,
+          "kl": Infinity
+        },
+        {
+          "lag": 4,
+          "kl": Infinity
+        }
+      ],
+      "vertical": [
+        {
+          "lag": 1,
+          "kl": 0.7238669297039511
+        },
+        {
+          "lag": 2,
+          "kl": 0.6547830455537609
+        },
+        {
+          "lag": 4,
+          "kl": 0.49291557065270375
+        }
+      ]
+    },
+    {
+      "label": "frequency \u2014 ordinary WFC",
+      "sample_count": 100,
+      "horizontal": [
+        {
+          "lag": 1,
+          "kl": 0.006419938218854355
+        },
+        {
+          "lag": 2,
+          "kl": Infinity
+        },
+        {
+          "lag": 4,
+          "kl": Infinity
+        }
+      ],
+      "vertical": [
+        {
+          "lag": 1,
+          "kl": 0.16368137596566504
+        },
+        {
+          "lag": 2,
+          "kl": 0.13213042003904887
+        },
+        {
+          "lag": 4,
+          "kl": 0.05032856289184033
+        }
+      ]
+    },
+    {
+      "label": "frequency \u2014 WFC-as-SAT",
+      "sample_count": 100,
+      "horizontal": [
+        {
+          "lag": 1,
+          "kl": 0.006419938218854355
+        },
+        {
+          "lag": 2,
+          "kl": Infinity
+        },
+        {
+          "lag": 4,
+          "kl": Infinity
+        }
+      ],
+      "vertical": [
+        {
+          "lag": 1,
+          "kl": 0.16368137596566504
+        },
+        {
+          "lag": 2,
+          "kl": 0.13213042003904887
+        },
+        {
+          "lag": 4,
+          "kl": 0.05032856289184033
+        }
+      ]
+    },
+    {
+      "label": "context \u2014 ordinary WFC",
+      "sample_count": 100,
+      "horizontal": [
+        {
+          "lag": 1,
+          "kl": 0.0002917025743800483
+        },
+        {
+          "lag": 2,
+          "kl": Infinity
+        },
+        {
+          "lag": 4,
+          "kl": Infinity
+        }
+      ],
+      "vertical": [
+        {
+          "lag": 1,
+          "kl": 0.0013831769117135335
+        },
+        {
+          "lag": 2,
+          "kl": 0.015280748224295083
+        },
+        {
+          "lag": 4,
+          "kl": 0.01779785567327373
+        }
+      ]
+    },
+    {
+      "label": "context \u2014 WFC-as-SAT",
+      "sample_count": 100,
+      "horizontal": [
+        {
+          "lag": 1,
+          "kl": 0.0002917025743800483
+        },
+        {
+          "lag": 2,
+          "kl": Infinity
+        },
+        {
+          "lag": 4,
+          "kl": Infinity
+        }
+      ],
+      "vertical": [
+        {
+          "lag": 1,
+          "kl": 0.0013831769117135335
+        },
+        {
+          "lag": 2,
+          "kl": 0.015280748224295083
+        },
+        {
+          "lag": 4,
+          "kl": 0.01779785567327373
+        }
+      ]
+    }
+  ],
+  "benchmarks": {
+    "simple-knot": {
+      "study_type": "representative single-seed",
+      "seeds": [
+        0
+      ],
+      "series": [
+        {
+          "label": "frequency \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.024350376576285034
+            },
+            {
+              "lag": 2,
+              "kl": 0.03050400351590074
+            },
+            {
+              "lag": 4,
+              "kl": 0.050157394309233355
+            },
+            {
+              "lag": 8,
+              "kl": 0.14523845100230848
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.07696149700817531
+            },
+            {
+              "lag": 2,
+              "kl": 0.054520486813879804
+            },
+            {
+              "lag": 4,
+              "kl": 0.23940141970411383
+            },
+            {
+              "lag": 8,
+              "kl": 0.07118042762285082
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.014636367656967637
+            },
+            {
+              "lag": 2,
+              "kl": 0.018321098721581663
+            },
+            {
+              "lag": 4,
+              "kl": 0.293967004917704
+            },
+            {
+              "lag": 8,
+              "kl": 0.6873732116821787
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.10735755344328876
+            },
+            {
+              "lag": 2,
+              "kl": 0.02076295429997726
+            },
+            {
+              "lag": 4,
+              "kl": 0.09333711571877479
+            },
+            {
+              "lag": 8,
+              "kl": 0.37294627887227333
+            }
+          ]
+        }
+      ],
+      "failed_conditions": [
+        {
+          "engine": "ordinary-wfc",
+          "decision": "frequency",
+          "success": false,
+          "conflicts": null,
+          "backtracks": null
+        },
+        {
+          "engine": "ordinary-wfc",
+          "decision": "context",
+          "success": false,
+          "conflicts": null,
+          "backtracks": null
+        }
+      ]
+    },
+    "cat": {
+      "study_type": "representative single-seed",
+      "seeds": [
+        0
+      ],
+      "series": [
+        {
+          "label": "frequency \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.7055290806834299
+            },
+            {
+              "lag": 2,
+              "kl": 0.7865460069212538
+            },
+            {
+              "lag": 4,
+              "kl": 0.8670007314655789
+            },
+            {
+              "lag": 8,
+              "kl": 0.9566491199710893
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.6264493485900801
+            },
+            {
+              "lag": 2,
+              "kl": 0.7283267510431554
+            },
+            {
+              "lag": 4,
+              "kl": 0.84930182822844
+            },
+            {
+              "lag": 8,
+              "kl": 1.7869518924568728
+            }
+          ]
+        },
+        {
+          "label": "frequency \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.5689925952606315
+            },
+            {
+              "lag": 2,
+              "kl": 0.6090929559045638
+            },
+            {
+              "lag": 4,
+              "kl": 0.7837376221614085
+            },
+            {
+              "lag": 8,
+              "kl": 1.1054138507924973
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.5379377991065613
+            },
+            {
+              "lag": 2,
+              "kl": 0.6275535658307809
+            },
+            {
+              "lag": 4,
+              "kl": 0.6572898485725089
+            },
+            {
+              "lag": 8,
+              "kl": 1.1278135280057837
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.4078008647735971
+            },
+            {
+              "lag": 2,
+              "kl": 0.47694307168522976
+            },
+            {
+              "lag": 4,
+              "kl": 0.5947034850506577
+            },
+            {
+              "lag": 8,
+              "kl": 0.8230535622467723
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.5404911855210845
+            },
+            {
+              "lag": 2,
+              "kl": 0.5981399659704479
+            },
+            {
+              "lag": 4,
+              "kl": 0.5121725899600675
+            },
+            {
+              "lag": 8,
+              "kl": 0.7354613170905627
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.2579572659040459
+            },
+            {
+              "lag": 2,
+              "kl": 0.2778292441346867
+            },
+            {
+              "lag": 4,
+              "kl": 0.37601061486741716
+            },
+            {
+              "lag": 8,
+              "kl": 0.4962165767680337
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.34452000610426714
+            },
+            {
+              "lag": 2,
+              "kl": 0.4033861672163281
+            },
+            {
+              "lag": 4,
+              "kl": 0.5170637760927292
+            },
+            {
+              "lag": 8,
+              "kl": 1.4793584973881613
+            }
+          ]
+        }
+      ],
+      "failed_conditions": []
+    },
+    "chess": {
+      "study_type": "representative single-seed",
+      "seeds": [
+        0
+      ],
+      "series": [
+        {
+          "label": "frequency \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ]
+        },
+        {
+          "label": "frequency \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.0
+            },
+            {
+              "lag": 2,
+              "kl": 0.0
+            },
+            {
+              "lag": 4,
+              "kl": 0.0
+            }
+          ]
+        }
+      ],
+      "failed_conditions": []
+    },
+    "knot": {
+      "study_type": "representative single-seed",
+      "seeds": [
+        0
+      ],
+      "series": [
+        {
+          "label": "frequency \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.06878005075045833
+            },
+            {
+              "lag": 2,
+              "kl": 0.05996501406146587
+            },
+            {
+              "lag": 4,
+              "kl": 0.0757306870503048
+            },
+            {
+              "lag": 8,
+              "kl": 0.05141978186227062
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.0977523880935109
+            },
+            {
+              "lag": 2,
+              "kl": 0.09458383257295108
+            },
+            {
+              "lag": 4,
+              "kl": 0.1173634614822151
+            },
+            {
+              "lag": 8,
+              "kl": 0.3137578211626837
+            }
+          ]
+        },
+        {
+          "label": "frequency \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.004380529967567532
+            },
+            {
+              "lag": 2,
+              "kl": 0.019156636213607747
+            },
+            {
+              "lag": 4,
+              "kl": 0.03516906580764365
+            },
+            {
+              "lag": 8,
+              "kl": 0.22273418404415743
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.013389609966558157
+            },
+            {
+              "lag": 2,
+              "kl": 0.024082287263290654
+            },
+            {
+              "lag": 4,
+              "kl": 0.1034581430651904
+            },
+            {
+              "lag": 8,
+              "kl": 0.19244305523315952
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.2928539372214218
+            },
+            {
+              "lag": 2,
+              "kl": 0.07473134540718943
+            },
+            {
+              "lag": 4,
+              "kl": 0.11874688793364609
+            },
+            {
+              "lag": 8,
+              "kl": 0.251407919140551
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.07676062401610032
+            },
+            {
+              "lag": 2,
+              "kl": 0.07989536472364644
+            },
+            {
+              "lag": 4,
+              "kl": 0.1001725390587612
+            },
+            {
+              "lag": 8,
+              "kl": 0.322038778355626
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.0011349139907217594
+            },
+            {
+              "lag": 2,
+              "kl": 0.030918017453713274
+            },
+            {
+              "lag": 4,
+              "kl": 0.030028239148182485
+            },
+            {
+              "lag": 8,
+              "kl": 0.3056661557586429
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.0020932155817590496
+            },
+            {
+              "lag": 2,
+              "kl": 0.016967495080325887
+            },
+            {
+              "lag": 4,
+              "kl": 0.08310906786683533
+            },
+            {
+              "lag": 8,
+              "kl": 0.21716939846421637
+            }
+          ]
+        }
+      ],
+      "failed_conditions": []
+    },
+    "simple-wall": {
+      "study_type": "representative single-seed",
+      "seeds": [
+        0
+      ],
+      "series": [
+        {
+          "label": "frequency \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.05993385243260141
+            },
+            {
+              "lag": 2,
+              "kl": 0.0737424203938199
+            },
+            {
+              "lag": 4,
+              "kl": 0.07718274413301073
+            },
+            {
+              "lag": 8,
+              "kl": 0.14325980632980162
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.08256952752737426
+            },
+            {
+              "lag": 2,
+              "kl": 0.10343054334473456
+            },
+            {
+              "lag": 4,
+              "kl": 0.29221722761717206
+            },
+            {
+              "lag": 8,
+              "kl": 0.39083869417641504
+            }
+          ]
+        },
+        {
+          "label": "frequency \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.05993385243260141
+            },
+            {
+              "lag": 2,
+              "kl": 0.0737424203938199
+            },
+            {
+              "lag": 4,
+              "kl": 0.07718274413301073
+            },
+            {
+              "lag": 8,
+              "kl": 0.14325980632980162
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.08256952752737426
+            },
+            {
+              "lag": 2,
+              "kl": 0.10343054334473456
+            },
+            {
+              "lag": 4,
+              "kl": 0.29221722761717206
+            },
+            {
+              "lag": 8,
+              "kl": 0.39083869417641504
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 ordinary WFC",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.05993385243260141
+            },
+            {
+              "lag": 2,
+              "kl": 0.0737424203938199
+            },
+            {
+              "lag": 4,
+              "kl": 0.07718274413301073
+            },
+            {
+              "lag": 8,
+              "kl": 0.14325980632980162
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.08256952752737426
+            },
+            {
+              "lag": 2,
+              "kl": 0.10343054334473456
+            },
+            {
+              "lag": 4,
+              "kl": 0.29221722761717206
+            },
+            {
+              "lag": 8,
+              "kl": 0.39083869417641504
+            }
+          ]
+        },
+        {
+          "label": "context \u2014 WFC-as-SAT",
+          "sample_count": 1,
+          "horizontal": [
+            {
+              "lag": 1,
+              "kl": 0.05993385243260141
+            },
+            {
+              "lag": 2,
+              "kl": 0.0737424203938199
+            },
+            {
+              "lag": 4,
+              "kl": 0.07718274413301073
+            },
+            {
+              "lag": 8,
+              "kl": 0.14325980632980162
+            }
+          ],
+          "vertical": [
+            {
+              "lag": 1,
+              "kl": 0.08256952752737426
+            },
+            {
+              "lag": 2,
+              "kl": 0.10343054334473456
+            },
+            {
+              "lag": 4,
+              "kl": 0.29221722761717206
+            },
+            {
+              "lag": 8,
+              "kl": 0.39083869417641504
+            }
+          ]
+        }
+      ],
+      "failed_conditions": []
+    },
+    "simple-maze": {
+      "study_type": "representative single-seed",
+      "status": "UNSAT",
+      "series": []
+    }
+  }
+}
