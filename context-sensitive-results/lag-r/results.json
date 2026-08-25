@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_utc": "2026-08-25T04:10:05.681309+00:00",
+    "generated_utc": "2026-08-25T04:16:25.136080+00:00",
     "lags_requested": [
       1,
       2,
@@ -118,7 +118,7 @@
     "benchmark_seeds": [
       0
     ],
-    "analysis_seconds": 0.44022356099999993
+    "analysis_seconds": 0.672809365
   },
   "validation": {
     "stick_wfc_sat_outputs_identical": true,
