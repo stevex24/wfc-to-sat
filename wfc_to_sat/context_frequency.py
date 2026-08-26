@@ -1,8 +1,8 @@
 """Context-frequency preprocessing shared by WFC decision heuristics.
 
-The four-neighbor context order is north, east, south, west.  Source
-boundaries and neighbors that are not yet decided are both represented by
-the explicit :data:`UNK` marker, following Bateni, Karth, and Smith.
+Neighborhoods are explicit, deterministic offset tuples.  The default von
+Neumann order is N,E,S,W; Moore uses N,NE,E,SE,S,SW,W,NW.  Source boundaries
+and neighbors that are not yet decided use the explicit :data:`UNK` marker.
 """
 
 from __future__ import annotations
@@ -11,12 +11,19 @@ from collections import Counter
 from dataclasses import dataclass
 from enum import Enum
 from itertools import product
-from typing import Generic, Hashable, Iterable, Sequence, TypeVar
+from typing import Generic, Hashable, Iterable, Sequence, TypeAlias, TypeVar
 
 
 Tile = TypeVar("Tile", bound=Hashable)
 ContextValue = Hashable
-Context = tuple[ContextValue, ContextValue, ContextValue, ContextValue]
+Context: TypeAlias = tuple[ContextValue, ...]
+Neighborhood: TypeAlias = tuple[tuple[int, int], ...]
+VON_NEUMANN: Neighborhood = ((0, -1), (1, 0), (0, 1), (-1, 0))
+MOORE: Neighborhood = (
+    (0, -1), (1, -1), (1, 0), (1, 1),
+    (0, 1), (-1, 1), (-1, 0), (-1, -1),
+)
+NEIGHBORHOODS = {"von_neumann": VON_NEUMANN, "moore": MOORE}
 
 
 class _Unknown(Enum):
@@ -44,7 +51,11 @@ class WeightLookup(Generic[Tile]):
 class ContextFrequencies(Generic[Tile]):
     """Count source tiles and their complete and masked contexts."""
 
-    def __init__(self, source_grid: Sequence[Sequence[Tile]]) -> None:
+    def __init__(
+        self,
+        source_grid: Sequence[Sequence[Tile]],
+        neighborhood: str | Sequence[tuple[int, int]] = "von_neumann",
+    ) -> None:
         rows = tuple(tuple(row) for row in source_grid)
         if not rows or not rows[0]:
             raise ValueError("source grid must be nonempty")
@@ -54,6 +65,20 @@ class ContextFrequencies(Generic[Tile]):
         if any(tile is UNK for row in rows for tile in row):
             raise ValueError("source tiles cannot use the reserved UNK marker")
 
+        if isinstance(neighborhood, str):
+            try:
+                offsets = NEIGHBORHOODS[neighborhood]
+            except KeyError as error:
+                raise ValueError(f"unknown neighborhood: {neighborhood!r}") from error
+            self.neighborhood_name = neighborhood
+        else:
+            offsets = tuple(tuple(offset) for offset in neighborhood)
+            self.neighborhood_name = "custom"
+        if not offsets or any(len(offset) != 2 or offset == (0, 0) for offset in offsets):
+            raise ValueError("neighborhood offsets must be nonempty 2D nonzero pairs")
+        if len(offsets) != len(set(offsets)):
+            raise ValueError("neighborhood offsets must be unique")
+        self.neighborhood: Neighborhood = offsets
         self.source_grid = rows
         self.width = width
         self.height = len(rows)
@@ -84,7 +109,7 @@ class ContextFrequencies(Generic[Tile]):
 
     def frequency(self, tile: Tile, context: Context) -> int:
         """Return ``freq(tile, context)``, or zero for an unseen pair."""
-        _validate_context(context)
+        _validate_context(context, len(self.neighborhood))
         return self._context_counts[(tile, context)]
 
     def context_was_seen(
@@ -93,7 +118,7 @@ class ContextFrequencies(Generic[Tile]):
         candidates: Iterable[Tile] | None = None,
     ) -> bool:
         """Whether the context occurred for any requested source tile."""
-        _validate_context(context)
+        _validate_context(context, len(self.neighborhood))
         options = self.tiles if candidates is None else tuple(candidates)
         return any(self.frequency(tile, context) > 0 for tile in options)
 
@@ -103,7 +128,7 @@ class ContextFrequencies(Generic[Tile]):
         context: Context,
     ) -> WeightLookup[Tile]:
         """Look up context weights, falling back only when all are zero."""
-        _validate_context(context)
+        _validate_context(context, len(self.neighborhood))
         options = tuple(candidates)
         for tile in options:
             if tile not in self._tile_counts:
@@ -122,12 +147,7 @@ class ContextFrequencies(Generic[Tile]):
                 return self.source_grid[ny][nx]
             return UNK
 
-        return (
-            value(x, y - 1),
-            value(x + 1, y),
-            value(x, y + 1),
-            value(x - 1, y),
-        )
+        return tuple(value(x + dx, y + dy) for dx, dy in self.neighborhood)
 
 
 def masked_contexts(context: Context) -> tuple[Context, ...]:
@@ -137,6 +157,8 @@ def masked_contexts(context: Context) -> tuple[Context, ...]:
     return tuple(product(*choices))  # type: ignore[return-value]
 
 
-def _validate_context(context: Context) -> None:
-    if len(context) != 4:
-        raise ValueError("a 2D four-neighbor context must contain four values")
+def _validate_context(context: Context, expected_length: int | None = None) -> None:
+    if expected_length is not None and len(context) != expected_length:
+        raise ValueError(f"context must contain {expected_length} values")
+    if not context:
+        raise ValueError("context must not be empty")
