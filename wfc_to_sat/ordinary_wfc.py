@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import random
 from typing import Generic, Hashable, Mapping, Sequence, TypeVar
 
-from wfc_to_sat.context_frequency import Context, ContextFrequencies, UNK
+from wfc_to_sat.context_frequency import Context, ContextFrequencies, MOORE, UNK, VON_NEUMANN
 
 
 Tile = TypeVar("Tile", bound=Hashable)
@@ -47,6 +47,8 @@ class WFCResult(Generic[Tile]):
     restarts: int
     contradictions: int
     observations: int
+    context_lookups: int = 0
+    context_fallbacks: int = 0
 
 
 @dataclass(frozen=True)
@@ -57,10 +59,12 @@ class WFCModel(Generic[Tile]):
     frequencies: Mapping[Tile, int]
     adjacency: Mapping[Direction, Mapping[Tile, tuple[Tile, ...]]]
     context_frequencies: ContextFrequencies[Tile] | None = None
+    moore_context_frequencies: ContextFrequencies[Tile] | None = None
 
     @classmethod
     def from_tile_grid(cls, source_grid: Sequence[Sequence[Tile]]) -> "WFCModel[Tile]":
         contexts = ContextFrequencies(source_grid)
+        moore_contexts = ContextFrequencies(source_grid, "moore")
         rows = contexts.source_grid
         tiles = contexts.tiles
         allowed: dict[Direction, dict[Tile, set[Tile]]] = {
@@ -85,6 +89,7 @@ class WFCModel(Generic[Tile]):
             frequencies={tile: contexts.tile_frequency(tile) for tile in tiles},
             adjacency=adjacency,
             context_frequencies=contexts,
+            moore_context_frequencies=moore_contexts,
         )
 
     @classmethod
@@ -115,11 +120,17 @@ class WFCModel(Generic[Tile]):
             if source_pattern_grid is not None
             else None
         )
+        moore_contexts = (
+            ContextFrequencies(source_pattern_grid, "moore")
+            if source_pattern_grid is not None
+            else None
+        )
         return WFCModel(
             tiles=pattern_ids,
             frequencies=frequencies,
             adjacency={"north": north, "east": east, "south": south, "west": west},
             context_frequencies=contexts,
+            moore_context_frequencies=moore_contexts,
         )
 
     def validate(self) -> None:
@@ -162,10 +173,12 @@ class OrdinaryWFC(Generic[Tile]):
             raise ValueError("output dimensions must be positive")
         if selection != "lexical":
             raise ValueError(f"unsupported selection heuristic: {selection!r}")
-        if decision not in {"uniform", "frequency", "context"}:
+        if decision not in {"uniform", "frequency", "context", "context_moore"}:
             raise ValueError(f"unsupported decision heuristic: {decision!r}")
         if decision == "context" and model.context_frequencies is None:
             raise ValueError("context decision requires source context frequencies")
+        if decision == "context_moore" and model.moore_context_frequencies is None:
+            raise ValueError("Moore context decision requires source context frequencies")
 
         self.model = model
         self.width = width
@@ -179,6 +192,8 @@ class OrdinaryWFC(Generic[Tile]):
         self._domains = [self._full_domain] * (width * height)
         self.observed: set[tuple[int, int]] = set()
         self.contradictions = 0
+        self.context_lookups = 0
+        self.context_fallbacks = 0
 
     def domain_at(self, x: int, y: int) -> tuple[Tile, ...]:
         return self._domain_values(self._domains[self._cell(x, y)])
@@ -193,7 +208,8 @@ class OrdinaryWFC(Generic[Tile]):
 
     def context_at(self, x: int, y: int) -> Context:
         values: list[Hashable] = []
-        for _, dx, dy in DIRECTIONS:
+        offsets = MOORE if self.decision == "context_moore" else VON_NEUMANN
+        for dx, dy in offsets:
             nx, ny = x + dx, y + dy
             if not (0 <= nx < self.width and 0 <= ny < self.height):
                 values.append(UNK)
@@ -201,7 +217,7 @@ class OrdinaryWFC(Generic[Tile]):
             domain = self._domains[self._cell(nx, ny)]
             options = self._domain_values(domain)
             values.append(options[0] if len(options) == 1 else UNK)
-        return (values[0], values[1], values[2], values[3])
+        return tuple(values)
 
     def decision_weights_at(self, x: int, y: int) -> DecisionWeights[Tile]:
         candidates = self.domain_at(x, y)
@@ -214,9 +230,15 @@ class OrdinaryWFC(Generic[Tile]):
                 candidates,
                 tuple(self.model.frequencies[tile] for tile in candidates),
             )
-        contexts = self.model.context_frequencies
+        contexts = (
+            self.model.moore_context_frequencies
+            if self.decision == "context_moore"
+            else self.model.context_frequencies
+        )
         assert contexts is not None
         lookup = contexts.candidate_weights(candidates, self.context_at(x, y))
+        self.context_lookups += 1
+        self.context_fallbacks += int(lookup.used_frequency_fallback)
         return DecisionWeights(
             candidates,
             lookup.weights,
@@ -312,6 +334,8 @@ class OrdinaryWFC(Generic[Tile]):
             restarts=0,
             contradictions=self.contradictions,
             observations=len(self.observed),
+            context_lookups=self.context_lookups,
+            context_fallbacks=self.context_fallbacks,
         )
 
     def _cell(self, x: int, y: int) -> int:

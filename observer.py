@@ -13,7 +13,7 @@ except ImportError:  # Keep pure state tests runnable before optional solver ins
         pass
 
 from trace_format import MappingSpec
-from wfc_to_sat.context_frequency import Context, ContextFrequencies, UNK
+from wfc_to_sat.context_frequency import Context, ContextFrequencies, MOORE, UNK, VON_NEUMANN
 
 
 Emit = Callable[[object], None]
@@ -31,7 +31,7 @@ class DomainObserver(Propagator):
         selection: str = "min_entropy",
     ) -> None:
         super().__init__()
-        if heuristic not in {"solver", "wfc", "uniform", "frequency", "context"}:
+        if heuristic not in {"solver", "wfc", "uniform", "frequency", "context", "context_moore"}:
             raise ValueError(f"unknown heuristic {heuristic!r}")
         if selection not in {"min_entropy", "lexical"}:
             raise ValueError(f"unknown selection heuristic {selection!r}")
@@ -45,11 +45,14 @@ class DomainObserver(Propagator):
         self.pattern_index = {pattern_id: i for i, pattern_id in enumerate(self.pattern_ids)}
         self.weights = tuple(item.frequency for item in mapping.patterns)
         self.context_frequencies = (
-            ContextFrequencies(mapping.source_pattern_grid)
+            ContextFrequencies(
+                mapping.source_pattern_grid,
+                "moore" if self.decision_heuristic == "context_moore" else "von_neumann",
+            )
             if mapping.source_pattern_grid is not None
             else None
         )
-        if self.decision_heuristic == "context" and self.context_frequencies is None:
+        if self.decision_heuristic in {"context", "context_moore"} and self.context_frequencies is None:
             raise ValueError("context heuristic requires mapping context_data")
         self.full_domain = (1 << len(self.pattern_ids)) - 1
         self.cell_count = mapping.width * mapping.height
@@ -59,6 +62,8 @@ class DomainObserver(Propagator):
         self.backtrack_events = 0
         self.restart_events = 0
         self.undone_assignments = 0
+        self.context_lookups = 0
+        self.context_fallbacks = 0
         self.trails: list[list[tuple[int, int, int | None]]] = [[]]
         self.var_info: dict[int, tuple[int, int, int, int]] = {}
         self.var_for_cell_pattern: dict[tuple[int, int], int] = {}
@@ -155,7 +160,10 @@ class DomainObserver(Propagator):
         contexts = self.context_frequencies
         assert contexts is not None
         ids = tuple(self.pattern_ids[index] for index in options)
-        return contexts.candidate_weights(ids, self.context_at_cell(cell)).weights
+        lookup = contexts.candidate_weights(ids, self.context_at_cell(cell))
+        self.context_lookups += 1
+        self.context_fallbacks += int(lookup.used_frequency_fallback)
+        return lookup.weights
 
     def context_at(self, x: int, y: int) -> Context:
         return self.context_at_cell(y * self.mapping.width + x)
@@ -163,14 +171,15 @@ class DomainObserver(Propagator):
     def context_at_cell(self, cell: int) -> Context:
         x, y = cell % self.mapping.width, cell // self.mapping.width
         values = []
-        for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+        offsets = MOORE if self.decision_heuristic == "context_moore" else VON_NEUMANN
+        for dx, dy in offsets:
             nx, ny = x + dx, y + dy
             if not (0 <= nx < self.mapping.width and 0 <= ny < self.mapping.height):
                 values.append(UNK)
                 continue
             ids = self.domain_ids(nx, ny)
             values.append(ids[0] if len(ids) == 1 else UNK)
-        return (values[0], values[1], values[2], values[3])
+        return tuple(values)
 
     def propagate(self) -> list[int]:
         return []
