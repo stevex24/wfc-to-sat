@@ -36,6 +36,34 @@ def lag_pair_counts(grid, lag, axis):
     return counts
 
 
+def displacement_pair_counts(grid, dx, dy):
+    """Count ordered pairs at an arbitrary nonzero signed displacement."""
+    width, height = _shape(grid)
+    if not isinstance(dx, int) or isinstance(dx, bool) or not isinstance(dy, int) or isinstance(dy, bool):
+        raise ValueError("displacement components must be integers")
+    if (dx, dy) == (0, 0):
+        raise ValueError("displacement must be nonzero")
+    if abs(dx) >= width or abs(dy) >= height:
+        raise ValueError("displacement is not available for this grid")
+    counts = Counter()
+    for y in range(height):
+        ny = y + dy
+        if not 0 <= ny < height:
+            continue
+        for x in range(width):
+            nx = x + dx
+            if 0 <= nx < width:
+                counts[(grid[y][x], grid[ny][nx])] += 1
+    return counts
+
+
+def displacement_kl(target_grids, source_grid, dx, dy):
+    target = Counter()
+    for grid in target_grids:
+        target.update(displacement_pair_counts(grid, dx, dy))
+    return kl_target_source(normalized(target), normalized(displacement_pair_counts(source_grid, dx, dy)))
+
+
 def normalized(counts):
     total = sum(counts.values())
     if not total:
