@@ -121,7 +121,10 @@
     "contradiction_policy": {
       "ordinary_wfc": "stop",
       "sat": "CDCL"
-    }
+    },
+    "execution_base_commit": "e4db319f22181599127127b172a06c30ddf11b9d",
+    "analysis_code_commit": "5c4069d",
+    "pilot": "matched SAT pilot stopped after >90 seconds before one seed completed"
   },
   "runs": [
     {

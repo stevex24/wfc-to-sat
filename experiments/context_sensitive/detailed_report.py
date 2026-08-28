@@ -67,7 +67,7 @@ def main_rows():
 
 def write_csv(path, fields, rows):
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields); writer.writeheader(); writer.writerows(rows)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n"); writer.writeheader(); writer.writerows(rows)
 
 
 def per_run_rows():
@@ -203,6 +203,12 @@ def main():
     OUT.mkdir(parents=True,exist_ok=True); (OUT/"raw").mkdir(exist_ok=True)
     rows=main_rows(); stats=per_run_rows(); performance=performance_rows()
     zelda=load("context-sensitive-results/detailed-comparison/raw/zelda-1x1.json")
+    zelda["metadata"].update({
+        "execution_base_commit": "e4db319f22181599127127b172a06c30ddf11b9d",
+        "analysis_code_commit": "5c4069d",
+        "pilot": "matched SAT pilot stopped after >90 seconds before one seed completed",
+    })
+    (OUT/"raw/zelda-1x1.json").write_text(json.dumps(zelda,indent=2)+"\n",encoding="utf-8")
     lag=lag_analysis(zelda["runs"]); render_zelda_seed(zelda["runs"])
     write_csv(OUT/"results.csv",FIELDS,rows)
     write_csv(OUT/"per-run.csv",list(stats[0]),stats)
