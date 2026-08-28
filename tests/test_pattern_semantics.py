@@ -10,6 +10,7 @@ from tests._pattern_report import build_pattern_id_grid
 from tests.validate_patterns import CASES
 from tests.validate_patterns import main
 from wfc_to_sat.patterns import (
+    extract_pattern_occurrence_grid,
     extract_patterns,
     extract_patterns_from_image,
     load_image_grid,
@@ -17,6 +18,56 @@ from wfc_to_sat.patterns import (
 
 
 class PatternSemanticTests(unittest.TestCase):
+    def test_nonwrapped_extraction_remains_the_default(self):
+        grid = ["ABC", "DEF", "GHI"]
+        self.assertEqual(extract_patterns(grid, 2), extract_patterns(grid, 2, extraction="nonwrapped"))
+        self.assertEqual(sum(p.frequency for p in extract_patterns(grid, 2)), 4)
+
+    def test_periodic_extraction_wraps_both_axes_and_preserves_multiplicity(self):
+        grid = ["AB", "CD"]
+        patterns, occurrences = extract_pattern_occurrence_grid(
+            grid, 2, extraction="periodic"
+        )
+        self.assertEqual(len(occurrences), 2)
+        self.assertEqual(tuple(map(len, occurrences)), (2, 2))
+        self.assertEqual(sum(pattern.frequency for pattern in patterns), 4)
+        self.assertEqual(
+            {pattern.rows for pattern in patterns},
+            {
+                (("A", "B"), ("C", "D")),
+                (("B", "A"), ("D", "C")),
+                (("C", "D"), ("A", "B")),
+                (("D", "C"), ("B", "A")),
+            },
+        )
+
+    def test_periodic_corner_windows_have_correct_overlap_compatibility(self):
+        from wfc_to_sat.compatibility import build_compatibility, overlaps_down, overlaps_right
+
+        patterns = extract_patterns(["AB", "CD"], 2, extraction="periodic")
+        allowed = build_compatibility(patterns)
+        for left in patterns:
+            self.assertEqual(
+                allowed["right"][left.id],
+                [right.id for right in patterns if overlaps_right(left, right)],
+            )
+            self.assertEqual(
+                allowed["down"][left.id],
+                [below.id for below in patterns if overlaps_down(left, below)],
+            )
+
+    def test_periodic_occurrences_reconstruct_the_source_from_pattern_origins(self):
+        grid = ["ABC", "DEF"]
+        patterns, occurrences = extract_pattern_occurrence_grid(
+            grid, 2, extraction="periodic"
+        )
+        by_id = {pattern.id: pattern for pattern in patterns}
+        reconstructed = tuple(
+            tuple(by_id[occurrences[y][x]].rows[0][0] for x in range(3))
+            for y in range(2)
+        )
+        self.assertEqual(reconstructed, tuple(tuple(row) for row in grid))
+
     def test_extraction_and_overlaps_match_independent_oracles(self):
         for name, grid, pattern_size in CASES:
             with self.subTest(case=name):

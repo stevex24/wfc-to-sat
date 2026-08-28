@@ -31,7 +31,11 @@ class CnfBuilder:
         return "\n".join(lines) + "\n"
 
 
-def patterns_to_cnf(patterns, allowed, width: int, height: int) -> CnfBuilder:
+def patterns_to_cnf(
+    patterns, allowed, width: int, height: int, *, adjacency_encoding="forbidden-pairs"
+) -> CnfBuilder:
+    if adjacency_encoding not in {"forbidden-pairs", "support"}:
+        raise ValueError("unknown adjacency encoding")
     cnf = CnfBuilder()
 
     # Create variables:
@@ -71,13 +75,21 @@ def patterns_to_cnf(patterns, allowed, width: int, height: int) -> CnfBuilder:
                     continue
 
                 for p1 in patterns:
-                    for p2 in patterns:
-
-                        if p2.id not in allowed[direction][p1.id]:
-                            cnf.add_clause([
-                                -cnf.var_for(x, y, p1.id),
-                                -cnf.var_for(nx, ny, p2.id),
-                            ])
+                    if adjacency_encoding == "support":
+                        cnf.add_clause(
+                            [-cnf.var_for(x, y, p1.id)]
+                            + [
+                                cnf.var_for(nx, ny, pattern_id)
+                                for pattern_id in allowed[direction][p1.id]
+                            ]
+                        )
+                    else:
+                        for p2 in patterns:
+                            if p2.id not in allowed[direction][p1.id]:
+                                cnf.add_clause([
+                                    -cnf.var_for(x, y, p1.id),
+                                    -cnf.var_for(nx, ny, p2.id),
+                                ])
 
     add_overlap_clauses("right", 1, 0)
     add_overlap_clauses("down", 0, 1)

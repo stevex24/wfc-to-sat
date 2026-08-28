@@ -14,19 +14,18 @@ def pattern_key(rows: tuple) -> str:
     return "/".join(str(row) for row in rows)
 
 
-def extract_patterns(text_grid: list[str], pattern_size: int):
+def extract_patterns(text_grid: list[str], pattern_size: int, *, extraction="nonwrapped"):
     height = len(text_grid)
     width = len(text_grid[0])
 
     counts = Counter()
 
-    for y in range(height - pattern_size + 1):
-        for x in range(width - pattern_size + 1):
-
-            rows = tuple(
-                _hashable_slice(text_grid[y + dy], x, x + pattern_size)
-                for dy in range(pattern_size)
-            )
+    _validate_extraction(extraction)
+    y_range = range(height) if extraction == "periodic" else range(height - pattern_size + 1)
+    x_range = range(width) if extraction == "periodic" else range(width - pattern_size + 1)
+    for y in y_range:
+        for x in x_range:
+            rows = _window(text_grid, x, y, pattern_size, extraction)
 
             counts[rows] += 1
 
@@ -44,26 +43,27 @@ def extract_patterns(text_grid: list[str], pattern_size: int):
     return patterns
 
 
-def extract_pattern_occurrence_grid(text_grid, pattern_size: int, patterns=None):
+def extract_pattern_occurrence_grid(
+    text_grid, pattern_size: int, patterns=None, *, extraction="nonwrapped"
+):
     """Return unique patterns and the source grid of their occurrence IDs.
 
     The occurrence grid has one cell per valid top-left pattern position and
-    intentionally uses the same non-wrapped extraction semantics as
-    :func:`extract_patterns`.
+    uses the same explicit extraction policy as :func:`extract_patterns`.
     """
     if patterns is None:
-        patterns = extract_patterns(text_grid, pattern_size)
+        patterns = extract_patterns(text_grid, pattern_size, extraction=extraction)
+    _validate_extraction(extraction)
     ids = {pattern.rows: pattern.id for pattern in patterns}
     height = len(text_grid)
     width = len(text_grid[0])
     occurrences = []
-    for y in range(height - pattern_size + 1):
+    y_range = range(height) if extraction == "periodic" else range(height - pattern_size + 1)
+    x_range = range(width) if extraction == "periodic" else range(width - pattern_size + 1)
+    for y in y_range:
         row = []
-        for x in range(width - pattern_size + 1):
-            rows = tuple(
-                _hashable_slice(text_grid[y + dy], x, x + pattern_size)
-                for dy in range(pattern_size)
-            )
+        for x in x_range:
+            rows = _window(text_grid, x, y, pattern_size, extraction)
             row.append(ids[rows])
         occurrences.append(tuple(row))
     return patterns, tuple(occurrences)
@@ -73,6 +73,21 @@ def _hashable_slice(row, start, stop):
     """Preserve text rows and make other cell sequences hashable."""
     segment = row[start:stop]
     return segment if isinstance(segment, str) else tuple(segment)
+
+
+def _window(grid, x, y, size, extraction):
+    if extraction == "nonwrapped":
+        return tuple(_hashable_slice(grid[y + dy], x, x + size) for dy in range(size))
+    height, width = len(grid), len(grid[0])
+    return tuple(
+        tuple(grid[(y + dy) % height][(x + dx) % width] for dx in range(size))
+        for dy in range(size)
+    )
+
+
+def _validate_extraction(extraction):
+    if extraction not in {"nonwrapped", "periodic"}:
+        raise ValueError("extraction must be 'nonwrapped' or 'periodic'")
 
 
 def load_image_grid(image_path):
@@ -106,6 +121,8 @@ def load_image_grid(image_path):
     ]
 
 
-def extract_patterns_from_image(image_path, pattern_size: int):
+def extract_patterns_from_image(image_path, pattern_size: int, *, extraction="nonwrapped"):
     """Extract patterns from the RGBA pixels of a PNG or JPEG image."""
-    return extract_patterns(load_image_grid(image_path), pattern_size)
+    return extract_patterns(
+        load_image_grid(image_path), pattern_size, extraction=extraction
+    )

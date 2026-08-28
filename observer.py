@@ -95,8 +95,17 @@ class DomainObserver(Propagator):
         self.emit(["l", self.current_level])
 
     def on_backtrack(self, to: int) -> None:
-        if to < 0 or to > self.current_level:
-            raise ValueError(f"invalid backtrack from {self.current_level} to {to}")
+        if to < 0:
+            raise ValueError(f"invalid backtrack level {to}")
+        # CaDiCaL may create internal levels containing no observed assignment
+        # without an on_new_level callback, then report one of those levels as
+        # a later backtrack target.  Such a forward synchronization has no
+        # observer trail to undo; retain state and align the next trail level.
+        if to > self.current_level:
+            self._ensure_level(to)
+            self.current_level = to
+            self.emit(["b", to, 0])
+            return
         undone = 0
         for level in range(self.current_level, to, -1):
             for cell, old_domain, old_selected in reversed(self.trails[level]):

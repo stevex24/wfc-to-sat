@@ -42,6 +42,18 @@ def mapping_with_context(width=3, height=2):
 
 
 class SatContextHeuristicTests(unittest.TestCase):
+    def test_backtrack_callback_can_synchronize_over_unobserved_solver_levels(self):
+        directory, _, mapping = mapping_with_context()
+        self.addCleanup(directory.cleanup)
+        observer = DomainObserver(mapping, lambda event: None, heuristic="context")
+        original = tuple(observer.domains)
+        observer.on_backtrack(2)
+        self.assertEqual(observer.current_level, 2)
+        self.assertEqual(tuple(observer.domains), original)
+        observer.on_assignment(1)
+        observer.on_backtrack(0)
+        self.assertEqual(tuple(observer.domains), original)
+
     def test_mapping_context_round_trip(self):
         directory, _, mapping = mapping_with_context()
         self.addCleanup(directory.cleanup)

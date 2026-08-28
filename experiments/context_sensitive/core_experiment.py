@@ -145,7 +145,8 @@ def add_metrics(records, source):
         record["edge_kl"] = kl_target_source(distribution(record["output"], edge=True), source_edge)
 
 
-def summaries(records):
+def summaries(records, source=None):
+    source = source_grid() if source is None else source
     result = []
     groups = sorted({(r["engine"], r["decision"]) for r in records})
     for engine, decision in groups:
@@ -162,7 +163,7 @@ def summaries(records):
         # Paper-compatible pooling: aggregate counts before normalization.
         if successful:
             pooled = ["".join(r["output"]) for r in successful]
-            item["pooled_tile_kl"] = kl_target_source(distribution(pooled), distribution(source_grid()))
+            item["pooled_tile_kl"] = kl_target_source(distribution(pooled), distribution(source))
             edge_counts = Counter()
             for r in successful:
                 rows = r["output"]
@@ -171,7 +172,7 @@ def summaries(records):
                         if x + 1 < len(row): edge_counts[("H", tile, row[x+1])] += 1
                         if y + 1 < len(rows): edge_counts[("V", tile, rows[y+1][x])] += 1
             total = sum(edge_counts.values())
-            item["pooled_edge_kl"] = kl_target_source({k:v/total for k,v in edge_counts.items()}, distribution(source_grid(), True))
+            item["pooled_edge_kl"] = kl_target_source({k:v/total for k,v in edge_counts.items()}, distribution(source, True))
         result.append(item)
     return result
 
