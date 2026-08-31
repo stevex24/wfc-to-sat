@@ -1,0 +1,27 @@
+[0.000368s] Zelda 3x3 assignment profile: before-assignment-optimization
+[0.000419s] source tile loading start
+[0.656868s] source tile loading complete: 0.656415s
+[0.656933s] peak RSS: 46256128 bytes
+[0.657417s] wrapped 3x3 pattern extraction start
+[0.896793s] wrapped 3x3 pattern extraction complete: 0.239332s
+[0.896852s] peak RSS: 50159616 bytes
+[0.897254s] overlap compatibility construction start
+[11.355302s] overlap compatibility construction complete: 10.457981s
+[11.355446s] peak RSS: 51261440 bytes
+[11.356151s] sequential CNF construction start
+[28.628101s] sequential CNF construction complete: 17.271898s
+[28.628181s] peak RSS: 1153200128 bytes
+[28.628718s] patterns: 2958
+[28.628765s] placement_variables: 1183200
+[28.628783s] auxiliary_variables: 1182800
+[28.628798s] total_variables: 2366000
+[28.628813s] exactly_one_clauses: 3548400
+[28.628828s] compatibility_support_clauses: 2248080
+[28.628842s] total_clauses: 5796480
+[28.703282s] CaDiCaL bootstrap start
+[35.844770s] CaDiCaL bootstrap complete: 7.141389s
+[35.946032s] peak RSS: 2323230720 bytes
+[36.510052s] mapping construction/validation start
+[41.070998s] mapping construction/validation complete: 4.560879s
+[41.071073s] peak RSS: 2329026560 bytes
+[43.100488s] DomainObserver attached; 1,183,200 placement variables observed; solve start

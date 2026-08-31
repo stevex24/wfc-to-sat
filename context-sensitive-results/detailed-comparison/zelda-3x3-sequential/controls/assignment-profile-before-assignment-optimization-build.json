@@ -1,0 +1,31 @@
+{
+  "mode": "assignment-profile-before-assignment-optimization-build",
+  "status": "started",
+  "timings_seconds": {
+    "source_loading": 0.6564154709999999,
+    "wrapped_pattern_extraction": 0.23933157200000021,
+    "compatibility": 10.457980603000001,
+    "cnf_construction": 17.271898067,
+    "cadical_bootstrap": 7.1413885240000035,
+    "mapping_construction": 4.560879419999999
+  },
+  "formula": {
+    "patterns": 2958,
+    "placement_variables": 1183200,
+    "auxiliary_variables": 1182800,
+    "total_variables": 2366000,
+    "exactly_one_clauses": 3548400,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 5796480
+  },
+  "result": {},
+  "peak_rss_bytes": {
+    "source_loading": 46256128,
+    "wrapped_pattern_extraction": 50159616,
+    "compatibility": 51261440,
+    "cnf_construction": 1153200128,
+    "cadical_bootstrap": 2323222528,
+    "mapping_construction": 2329026560
+  },
+  "total_wall_seconds_so_far": 41.071101471
+}
