@@ -1,0 +1,25 @@
+{
+  "status": "SAT",
+  "selection": "min_entropy",
+  "seed": 0,
+  "wall_seconds_so_far": 113.144633101,
+  "formula": {
+    "patterns": 2958,
+    "placement_variables": 1183200,
+    "auxiliary_variables": 1182800,
+    "total_variables": 2366000,
+    "exactly_one_clauses": 3548400,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 5796480
+  },
+  "cadical_bootstrap_seconds": 6.6985806530000005,
+  "mapping_seconds": 4.496579984,
+  "observer_attach_seconds": 1.5865128280000036,
+  "observe_seconds": 0.4408417850000035,
+  "solve_entered": true,
+  "solve_seconds": 70.417051913,
+  "conflicts": 13,
+  "decisions": 228,
+  "observer_backtracks": 13,
+  "undone_assignments": 0
+}

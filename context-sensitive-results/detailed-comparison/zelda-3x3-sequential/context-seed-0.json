@@ -25,18 +25,18 @@
     "total_clauses": 5796480
   },
   "timings_seconds": {
-    "source_loading": 0.357744913,
-    "wrapped_pattern_extraction": 0.23929612199999994,
-    "compatibility": 10.469795941,
-    "cnf_variables": 0.9988152750000001,
-    "cnf_exactly_one": 4.345552693,
-    "cnf_compatibility": 11.823669198000001,
-    "total_cnf_construction": 17.213258213000003,
-    "cadical_bootstrap": 7.910297428000003,
-    "mapping_construction": 4.652428530000002,
-    "observer_attach": 1.6218340870000034,
-    "observe_registration": 0.4541464469999994,
-    "solver_solve_lower_bound": 136.219008,
+    "source_loading": 0.7317651380000001,
+    "wrapped_pattern_extraction": 0.24229609899999982,
+    "compatibility": 10.452424519000001,
+    "cnf_variables": 0.9794998759999984,
+    "cnf_exactly_one": 4.288863663000001,
+    "cnf_compatibility": 12.034066321999997,
+    "total_cnf_construction": 17.30273974,
+    "cadical_bootstrap": 6.453897038000001,
+    "mapping_construction": 4.450705126999999,
+    "observer_attach": 1.5742984460000002,
+    "observe_registration": 0.439159066000002,
+    "solver_solve_lower_bound": 138.115291,
     "total_wall_watchdog": 180.0
   },
   "result": {
@@ -50,13 +50,13 @@
   "metrics": {},
   "total_wall_seconds_so_far": 180.0,
   "peak_rss_bytes": {
-    "source tile loading": 46260224,
-    "wrapped 3x3 pattern extraction": 50200576,
-    "overlap compatibility construction": 51433472,
-    "total sequential CNF construction": 1140293632,
-    "CaDiCaL bootstrap": 2327773184,
-    "mapping construction/validation": 2449702912,
-    "DomainObserver construction/connection": 2454093824,
-    "placement observe() registration": 2454093824
+    "source tile loading": 46620672,
+    "wrapped 3x3 pattern extraction": 50552832,
+    "overlap compatibility construction": 51806208,
+    "total sequential CNF construction": 1154273280,
+    "CaDiCaL bootstrap": 2570080256,
+    "mapping construction/validation": 2924838912,
+    "DomainObserver construction/connection": 2963476480,
+    "placement observe() registration": 2963476480
   }
 }

@@ -19,10 +19,10 @@ from experiments.context_sensitive.zelda_3x3_sequential_controls import (
     build_mapping,
     construct_formula,
 )
-from observer import DomainObserver, _bit_count
+from observer import DomainObserver, _has_multiple_bits, _set_bit_indexes
 
 
-OUT = ROOT / "context-sensitive-results/detailed-comparison/zelda-3x3-sequential/profile"
+OUT = ROOT / "context-sensitive-results/detailed-comparison/zelda-3x3-sequential/profile-optimized"
 LOG = OUT / "context-lexical-seed-0.log"
 RAW = OUT / "context-lexical-seed-0.json"
 
@@ -132,24 +132,20 @@ class ProfiledDomainObserver(DomainObserver):
             # This is the existing lexical/context decision path split only at
             # its current operation boundaries for timing.
             started = time.perf_counter()
-            candidates = []
+            cell = None
             for cell, domain in enumerate(self.domains):
-                size = _bit_count(domain)
-                if size <= 1 or self.selected[cell] is not None:
-                    continue
-                candidates.append((0, 0.0, 0.0, cell))
-            if not candidates:
+                if _has_multiple_bits(domain) and self.selected[cell] is None:
+                    break
+            else:
+                cell = None
+            if cell is None:
                 self.profile.times["lexical_cell_selection"] += time.perf_counter() - started
                 return 0
-            _, _, _, cell = min(candidates)
             self.profile.times["lexical_cell_selection"] += time.perf_counter() - started
             self.profile.reached_cells.add(cell)
 
             started = time.perf_counter()
-            indexes = [
-                index for index in range(len(self.pattern_ids))
-                if self.domains[cell] & (1 << index)
-            ]
+            indexes = _set_bit_indexes(self.domains[cell])
             ids = tuple(self.pattern_ids[index] for index in indexes)
             self.profile.times["candidate_enumeration_domain_scanning"] += time.perf_counter() - started
             size = len(indexes)
@@ -179,7 +175,7 @@ class ProfiledDomainObserver(DomainObserver):
 
 def main():
     profile = Profile()
-    record = Record("context-profile-build")
+    record = Record("context-profile-optimized-build")
     record.line("Zelda 3x3 Context lexical sequential profiling probe")
     _, tile_rgba, patterns, occurrences, allowed, cnf = construct_formula(record)
 

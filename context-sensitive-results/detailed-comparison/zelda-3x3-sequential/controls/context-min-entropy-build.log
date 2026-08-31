@@ -1,0 +1,19 @@
+[0.000342s] source tile loading start
+[0.757333s] source tile loading complete: 0.756922s
+[0.757410s] peak RSS: 45535232 bytes
+[0.757942s] wrapped 3x3 pattern extraction start
+[1.007167s] wrapped 3x3 pattern extraction complete: 0.249104s
+[1.007228s] peak RSS: 49479680 bytes
+[1.007568s] overlap compatibility construction start
+[11.572513s] overlap compatibility construction complete: 10.564886s
+[11.572622s] peak RSS: 50589696 bytes
+[11.573081s] sequential CNF construction start
+[29.282758s] sequential CNF construction complete: 17.709636s
+[29.282840s] peak RSS: 1152638976 bytes
+[29.283339s] patterns: 2958
+[29.283378s] placement_variables: 1183200
+[29.283393s] auxiliary_variables: 1182800
+[29.283405s] total_variables: 2366000
+[29.283417s] exactly_one_clauses: 3548400
+[29.283429s] compatibility_support_clauses: 2248080
+[29.283441s] total_clauses: 5796480

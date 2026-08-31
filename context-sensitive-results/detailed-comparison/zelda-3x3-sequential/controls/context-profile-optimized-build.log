@@ -1,0 +1,27 @@
+[0.000519s] Zelda 3x3 Context lexical sequential profiling probe
+[0.000570s] source tile loading start
+[0.326267s] source tile loading complete: 0.325646s
+[0.326352s] peak RSS: 45985792 bytes
+[0.326741s] wrapped 3x3 pattern extraction start
+[0.567444s] wrapped 3x3 pattern extraction complete: 0.240639s
+[0.567568s] peak RSS: 49909760 bytes
+[0.568225s] overlap compatibility construction start
+[11.042475s] overlap compatibility construction complete: 10.474203s
+[11.042572s] peak RSS: 50958336 bytes
+[11.043060s] sequential CNF construction start
+[28.388117s] sequential CNF construction complete: 17.345011s
+[28.388200s] peak RSS: 1152860160 bytes
+[28.388648s] patterns: 2958
+[28.388673s] placement_variables: 1183200
+[28.388687s] auxiliary_variables: 1182800
+[28.388710s] total_variables: 2366000
+[28.388722s] exactly_one_clauses: 3548400
+[28.388735s] compatibility_support_clauses: 2248080
+[28.388747s] total_clauses: 5796480
+[28.395611s] CaDiCaL bootstrap start
+[36.416316s] CaDiCaL bootstrap complete: 8.020598s
+[36.441270s] peak RSS: 2213183488 bytes
+[36.477452s] mapping construction/validation start
+[41.104995s] mapping construction/validation complete: 4.627477s
+[41.105068s] peak RSS: 2251354112 bytes
+[43.075324s] DomainObserver attached; 1,183,200 placement variables observed; solve start

@@ -1,0 +1,31 @@
+{
+  "mode": "context-profile-optimized-build",
+  "status": "started",
+  "timings_seconds": {
+    "source_loading": 0.325646479,
+    "wrapped_pattern_extraction": 0.240638613,
+    "compatibility": 10.474202907,
+    "cnf_construction": 17.345011151,
+    "cadical_bootstrap": 8.020598486,
+    "mapping_construction": 4.6274771900000005
+  },
+  "formula": {
+    "patterns": 2958,
+    "placement_variables": 1183200,
+    "auxiliary_variables": 1182800,
+    "total_variables": 2366000,
+    "exactly_one_clauses": 3548400,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 5796480
+  },
+  "result": {},
+  "peak_rss_bytes": {
+    "source_loading": 45985792,
+    "wrapped_pattern_extraction": 49909760,
+    "compatibility": 50958336,
+    "cnf_construction": 1152860160,
+    "cadical_bootstrap": 2213183488,
+    "mapping_construction": 2251354112
+  },
+  "total_wall_seconds_so_far": 41.105096734
+}

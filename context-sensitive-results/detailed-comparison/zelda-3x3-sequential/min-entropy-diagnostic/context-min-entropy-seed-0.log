@@ -1,0 +1,11 @@
+[0.000111s] Context + min-entropy diagnostic (not the required lexical condition)
+[29.379974s] CaDiCaL bootstrap start
+[36.078933s] CaDiCaL bootstrap complete: 6.698581s
+[36.079386s] mapping construction start
+[40.576309s] mapping construction complete: 4.496580s
+[40.643162s] DomainObserver Context + min-entropy construction/connection start
+[42.229952s] observer construction/connection complete: 1.586513s
+[42.230422s] observe 1,183,200 placement variables start
+[42.671624s] observe registration complete: 0.440842s
+[42.672075s] solver.solve() start
+[113.089455s] solver.solve() complete: 70.417052s; SAT
