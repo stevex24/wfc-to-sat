@@ -52,9 +52,19 @@ class DomainObserver(Propagator):
         if self.decision_heuristic == "context" and self.context_frequencies is None:
             raise ValueError("context heuristic requires mapping context_data")
         self.full_domain = (1 << len(self.pattern_ids)) - 1
+        self.pattern_bits = tuple(1 << index for index in range(len(self.pattern_ids)))
         self.cell_count = mapping.width * mapping.height
         self.domains = [self.full_domain] * self.cell_count
         self.selected: list[int | None] = [None] * self.cell_count
+        self.neighbor_cells = tuple(
+            tuple(
+                ny * mapping.width + nx
+                if 0 <= nx < mapping.width and 0 <= ny < mapping.height else -1
+                for nx, ny in ((x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y))
+            )
+            for y in range(mapping.height)
+            for x in range(mapping.width)
+        )
         self.current_level = 0
         self.backtrack_events = 0
         self.restart_events = 0
@@ -75,7 +85,7 @@ class DomainObserver(Propagator):
         cell, x, y, pattern_index = info
         old_domain, old_selected = self.domains[cell], self.selected[cell]
         if lit > 0:
-            new_domain = 1 << pattern_index
+            new_domain = self.pattern_bits[pattern_index]
             new_selected: int | None = pattern_index
         else:
             new_domain = old_domain & ~(1 << pattern_index)
@@ -134,19 +144,25 @@ class DomainObserver(Propagator):
     def decide(self) -> int:
         if self.heuristic == "solver":
             return 0
-        candidates: list[tuple[int, float, float, int]] = []
-        for cell, domain in enumerate(self.domains):
-            size = _bit_count(domain)
-            if size <= 1 or self.selected[cell] is not None:
-                continue
-            if self.selection_heuristic == "lexical":
-                candidates.append((0, 0.0, 0.0, cell))
-            else:
+        if self.selection_heuristic == "lexical":
+            cell = next(
+                (cell for cell, domain in enumerate(self.domains)
+                 if _has_multiple_bits(domain) and self.selected[cell] is None),
+                None,
+            )
+            if cell is None:
+                return 0
+        else:
+            candidates: list[tuple[int, float, float, int]] = []
+            for cell, domain in enumerate(self.domains):
+                size = _bit_count(domain)
+                if size <= 1 or self.selected[cell] is not None:
+                    continue
                 candidates.append((size, self._entropy(domain), self.random.random(), cell))
-        if not candidates:
-            return 0
-        _, _, _, cell = min(candidates)
-        indexes = [index for index in range(len(self.pattern_ids)) if self.domains[cell] & (1 << index)]
+            if not candidates:
+                return 0
+            _, _, _, cell = min(candidates)
+        indexes = _set_bit_indexes(self.domains[cell])
         weights = self.decision_weights(cell, indexes)
         chosen = self.random.choices(indexes, weights=weights, k=1)[0]
         return self.var_for_cell_pattern[(cell, chosen)]
@@ -170,16 +186,19 @@ class DomainObserver(Propagator):
         return self.context_at_cell(y * self.mapping.width + x)
 
     def context_at_cell(self, cell: int) -> Context:
-        x, y = cell % self.mapping.width, cell // self.mapping.width
-        values = []
-        for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
-            nx, ny = x + dx, y + dy
-            if not (0 <= nx < self.mapping.width and 0 <= ny < self.mapping.height):
-                values.append(UNK)
-                continue
-            ids = self.domain_ids(nx, ny)
-            values.append(ids[0] if len(ids) == 1 else UNK)
-        return (values[0], values[1], values[2], values[3])
+        def singleton_id(neighbor: int):
+            if neighbor < 0:
+                return UNK
+            domain = self.domains[neighbor]
+            if domain == 0 or _has_multiple_bits(domain):
+                return UNK
+            return self.pattern_ids[domain.bit_length() - 1]
+
+        north, east, south, west = self.neighbor_cells[cell]
+        return (
+            singleton_id(north), singleton_id(east),
+            singleton_id(south), singleton_id(west),
+        )
 
     def propagate(self) -> list[int]:
         return []
@@ -206,3 +225,17 @@ class DomainObserver(Propagator):
 
 def _bit_count(value: int) -> int:
     return bin(value).count("1")
+
+
+def _has_multiple_bits(value: int) -> bool:
+    return bool(value & (value - 1))
+
+
+def _set_bit_indexes(value: int) -> list[int]:
+    """Return set-bit indexes in the same ascending order as a range scan."""
+    indexes = []
+    while value:
+        lowest = value & -value
+        indexes.append(lowest.bit_length() - 1)
+        value ^= lowest
+    return indexes

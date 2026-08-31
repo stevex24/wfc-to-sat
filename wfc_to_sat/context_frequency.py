@@ -60,6 +60,9 @@ class ContextFrequencies(Generic[Tile]):
         self._tile_counts: Counter[Tile] = Counter()
         self._context_counts: Counter[tuple[Tile, Context]] = Counter()
         self._complete_contexts: list[tuple[Tile, Context]] = []
+        self._candidate_weight_cache: dict[
+            tuple[tuple[Tile, ...], Context], WeightLookup[Tile]
+        ] = {}
 
         for y, row in enumerate(rows):
             for x, tile in enumerate(row):
@@ -105,16 +108,23 @@ class ContextFrequencies(Generic[Tile]):
         """Look up context weights, falling back only when all are zero."""
         _validate_context(context)
         options = tuple(candidates)
+        cache_key = (options, context)
+        cached = self._candidate_weight_cache.get(cache_key)
+        if cached is not None:
+            return cached
         for tile in options:
             if tile not in self._tile_counts:
                 raise KeyError(f"candidate tile is absent from source: {tile!r}")
         weights = tuple(self.frequency(tile, context) for tile in options)
         if options and not any(weights):
-            return WeightLookup(
+            result = WeightLookup(
                 tuple(self.tile_frequency(tile) for tile in options),
                 used_frequency_fallback=True,
             )
-        return WeightLookup(weights, used_frequency_fallback=False)
+        else:
+            result = WeightLookup(weights, used_frequency_fallback=False)
+        self._candidate_weight_cache[cache_key] = result
+        return result
 
     def _context_at(self, x: int, y: int) -> Context:
         def value(nx: int, ny: int) -> ContextValue:
