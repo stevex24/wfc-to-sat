@@ -1,0 +1,39 @@
+{
+  "mode": "plain",
+  "status": "completed",
+  "timings_seconds": {
+    "source_loading": 0.327422777,
+    "wrapped_pattern_extraction": 0.25519815,
+    "compatibility": 10.633538447,
+    "cnf_construction": 17.249576282,
+    "cadical_bootstrap": 8.118376123,
+    "solver_solve": 0.28254015600000315,
+    "total_wall": 37.21114799
+  },
+  "formula": {
+    "patterns": 2958,
+    "placement_variables": 1183200,
+    "auxiliary_variables": 1182800,
+    "total_variables": 2366000,
+    "exactly_one_clauses": 3548400,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 5796480
+  },
+  "result": {
+    "observer_attached": false,
+    "solve_entered": true,
+    "status": "SAT",
+    "conflicts": 0,
+    "decisions": 0,
+    "observer_backtrack_callbacks": null,
+    "observer_undone_assignments": null
+  },
+  "peak_rss_bytes": {
+    "source_loading": 46915584,
+    "wrapped_pattern_extraction": 50888704,
+    "compatibility": 51965952,
+    "cnf_construction": 1153454080,
+    "cadical_bootstrap": 2361540608
+  },
+  "total_wall_seconds_so_far": 37.211149887
+}

@@ -1,0 +1,31 @@
+{
+  "mode": "context-profile-build",
+  "status": "started",
+  "timings_seconds": {
+    "source_loading": 0.6723781069999997,
+    "wrapped_pattern_extraction": 0.2400162349999997,
+    "compatibility": 10.521784298,
+    "cnf_construction": 17.226567799999998,
+    "cadical_bootstrap": 8.196717915000004,
+    "mapping_construction": 4.617659936999999
+  },
+  "formula": {
+    "patterns": 2958,
+    "placement_variables": 1183200,
+    "auxiliary_variables": 1182800,
+    "total_variables": 2366000,
+    "exactly_one_clauses": 3548400,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 5796480
+  },
+  "result": {},
+  "peak_rss_bytes": {
+    "source_loading": 45961216,
+    "wrapped_pattern_extraction": 49864704,
+    "compatibility": 50933760,
+    "cnf_construction": 1152815104,
+    "cadical_bootstrap": 2066509824,
+    "mapping_construction": 2307006464
+  },
+  "total_wall_seconds_so_far": 41.591475327999994
+}

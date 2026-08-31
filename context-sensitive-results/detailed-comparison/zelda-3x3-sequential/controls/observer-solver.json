@@ -1,0 +1,47 @@
+{
+  "mode": "observer-solver",
+  "status": "completed",
+  "timings_seconds": {
+    "source_loading": 0.7200701379999996,
+    "wrapped_pattern_extraction": 0.23837675700000016,
+    "compatibility": 10.388054066,
+    "cnf_construction": 17.183321702,
+    "cadical_bootstrap": 6.773378989999998,
+    "mapping_construction": 4.487025607999996,
+    "observer_attach": 1.5955335100000028,
+    "observe_registration": 0.44848543199999824,
+    "solver_solve": 22.01139209200001,
+    "total_wall": 64.087721735
+  },
+  "formula": {
+    "patterns": 2958,
+    "placement_variables": 1183200,
+    "auxiliary_variables": 1182800,
+    "total_variables": 2366000,
+    "exactly_one_clauses": 3548400,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 5796480
+  },
+  "result": {
+    "observer_attached": true,
+    "observed_placement_variables": 1183200,
+    "observed_auxiliary_variables": 0,
+    "solve_entered": true,
+    "status": "SAT",
+    "conflicts": 0,
+    "decisions": 1019191,
+    "observer_backtrack_callbacks": 0,
+    "observer_undone_assignments": 0
+  },
+  "peak_rss_bytes": {
+    "source_loading": 46002176,
+    "wrapped_pattern_extraction": 49995776,
+    "compatibility": 51089408,
+    "cnf_construction": 1140133888,
+    "cadical_bootstrap": 2466115584,
+    "mapping_construction": 2493210624,
+    "observer_attach": 2493210624,
+    "observe_registration": 2493210624
+  },
+  "total_wall_seconds_so_far": 64.087725342
+}

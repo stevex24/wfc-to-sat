@@ -1,0 +1,27 @@
+[0.000366s] Zelda 3x3 sequential control start: plain
+[0.000433s] source tile loading start
+[0.327901s] source tile loading complete: 0.327423s
+[0.327961s] peak RSS: 46915584 bytes
+[0.328335s] wrapped 3x3 pattern extraction start
+[0.583579s] wrapped 3x3 pattern extraction complete: 0.255198s
+[0.583639s] peak RSS: 50888704 bytes
+[0.584009s] overlap compatibility construction start
+[11.217597s] overlap compatibility construction complete: 10.633538s
+[11.217658s] peak RSS: 51965952 bytes
+[11.218056s] sequential CNF construction start
+[28.467676s] sequential CNF construction complete: 17.249576s
+[28.482387s] peak RSS: 1153454080 bytes
+[28.484421s] patterns: 2958
+[28.484588s] placement_variables: 1183200
+[28.484627s] auxiliary_variables: 1182800
+[28.484656s] total_variables: 2366000
+[28.484678s] exactly_one_clauses: 3548400
+[28.484702s] compatibility_support_clauses: 2248080
+[28.484726s] total_clauses: 5796480
+[28.724134s] CaDiCaL bootstrap start
+[36.842904s] CaDiCaL bootstrap complete: 8.118376s
+[36.904560s] peak RSS: 2361802752 bytes
+[36.906815s] DomainObserver attached: False
+[36.910021s] solver.solve() start
+[37.192616s] solver.solve() complete: 0.282540s
+[37.211608s] total wall-clock complete: 37.211148s

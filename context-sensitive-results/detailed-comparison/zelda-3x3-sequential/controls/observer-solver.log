@@ -1,0 +1,36 @@
+[0.000549s] Zelda 3x3 sequential control start: observer-solver
+[0.000622s] source tile loading start
+[0.720731s] source tile loading complete: 0.720070s
+[0.720797s] peak RSS: 46002176 bytes
+[0.721113s] wrapped 3x3 pattern extraction start
+[0.959542s] wrapped 3x3 pattern extraction complete: 0.238377s
+[0.959604s] peak RSS: 49995776 bytes
+[0.960008s] overlap compatibility construction start
+[11.348111s] overlap compatibility construction complete: 10.388054s
+[11.348196s] peak RSS: 51089408 bytes
+[11.348625s] sequential CNF construction start
+[28.531995s] sequential CNF construction complete: 17.183322s
+[28.532056s] peak RSS: 1140133888 bytes
+[28.532447s] patterns: 2958
+[28.532471s] placement_variables: 1183200
+[28.532486s] auxiliary_variables: 1182800
+[28.532499s] total_variables: 2366000
+[28.532512s] exactly_one_clauses: 3548400
+[28.532525s] compatibility_support_clauses: 2248080
+[28.532548s] total_clauses: 5796480
+[28.589538s] CaDiCaL bootstrap start
+[35.362989s] CaDiCaL bootstrap complete: 6.773379s
+[35.375827s] peak RSS: 2466115584 bytes
+[35.376315s] mapping construction/validation start
+[39.863401s] mapping construction/validation complete: 4.487026s
+[39.863627s] peak RSS: 2493210624 bytes
+[39.864101s] DomainObserver solver-mode construction/connection start
+[41.459697s] DomainObserver solver-mode construction/connection complete: 1.595534s
+[41.459933s] peak RSS: 2493210624 bytes
+[41.564797s] placement-only observe() registration start
+[42.013394s] placement-only observe() registration complete: 0.448485s
+[42.013476s] peak RSS: 2493210624 bytes
+[42.072913s] DomainObserver attached: True; heuristic=solver; decide() returns 0
+[42.073339s] solver.solve() start
+[64.084786s] solver.solve() complete: 22.011392s
+[64.088258s] total wall-clock complete: 64.087722s
