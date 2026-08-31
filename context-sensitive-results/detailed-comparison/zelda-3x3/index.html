@@ -1,0 +1,9 @@
+<!doctype html><html><head><meta charset=utf-8><title>Zelda 3x3 safety probe</title>
+<style>body{font:16px/1.5 system-ui;margin:2rem;max-width:1100px;color:#172033}img{max-width:100%;image-rendering:pixelated}table{border-collapse:collapse}td,th{border:1px solid #9aa7b8;padding:.5rem;text-align:right}td:first-child,th:first-child{text-align:left}.stop{padding:1rem;border-left:6px solid #b42318;background:#fff0ed}</style></head><body>
+<h1>Zelda overlapping 3×3 — Stage 1 safety checkpoint</h1><p>Seed 0 · Context · lexical · 20×20 placements · periodic source extraction · finite output boundary</p>
+<img src=source.png alt='Source Zelda map'><p class=stop><b>Stopped before CNF allocation and solve.</b> The unchanged pairwise exactly-one representation would require 1,751,609,680 clauses. No SAT result or generated output exists.</p>
+<table><tr><th>Quantity</th><th>Value</th></tr>
+<tr><td>Extracted patterns</td><td>2,958</td></tr><tr><td>SAT variables</td><td>1,183,200</td></tr><tr><td>Exactly-one clauses</td><td>1,749,361,600</td></tr><tr><td>Compatibility/support clauses</td><td>2,248,080</td></tr><tr><td>Total clauses</td><td>1,751,609,680</td></tr><tr><td>Conservative Python clause-container lower bound</td><td>130.5 GiB</td></tr></table>
+<h2>Measured preprocessing</h2><table><tr><th>Stage</th><th>Seconds</th></tr><tr><td>Source tile loading</td><td>0.314186</td></tr><tr><td>Wrapped 3×3 extraction</td><td>0.238920</td></tr><tr><td>Context-frequency construction</td><td>0.528112</td></tr><tr><td>Compatibility construction</td><td>10.477252</td></tr><tr><td>Total wall</td><td>11.568484</td></tr></table>
+<p>Unmeasured because of the safety stop: SAT-variable materialization, clause construction, CaDiCaL bootstrap, observer attachment/registration, and SAT search.</p><p><a href='zelda-3x3-context-seed-0.json'>Raw JSON</a> · <a href='zelda-3x3-context-seed-0-timing.log'>Timing log</a></p>
+</body></html>

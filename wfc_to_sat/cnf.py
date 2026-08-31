@@ -18,6 +18,12 @@ class CnfBuilder:
     def add_clause(self, clause):
         self.clauses.append(list(clause))
 
+    def new_aux_var(self) -> int:
+        """Allocate an unnamed variable that is not a pattern placement."""
+        variable = self.next_var
+        self.next_var += 1
+        return variable
+
     @property
     def num_vars(self) -> int:
         return self.next_var - 1
@@ -33,10 +39,12 @@ class CnfBuilder:
 
 def patterns_to_cnf(
     patterns, allowed, width: int, height: int, *, adjacency_encoding="forbidden-pairs",
-    timing_hook=None,
+    exactly_one_encoding="pairwise", timing_hook=None,
 ) -> CnfBuilder:
     if adjacency_encoding not in {"forbidden-pairs", "support"}:
         raise ValueError("unknown adjacency encoding")
+    if exactly_one_encoding not in {"pairwise", "sequential"}:
+        raise ValueError("unknown exactly-one encoding")
     cnf = CnfBuilder()
 
     def timing(event, stage):
@@ -64,13 +72,14 @@ def patterns_to_cnf(
                 for pattern in patterns
             )
 
-            # At most one pattern.
-            for i in range(len(patterns)):
-                for j in range(i + 1, len(patterns)):
-                    cnf.add_clause([
-                        -cnf.var_for(x, y, patterns[i].id),
-                        -cnf.var_for(x, y, patterns[j].id),
-                    ])
+            variables = [cnf.var_for(x, y, pattern.id) for pattern in patterns]
+            if exactly_one_encoding == "pairwise":
+                # At most one pattern (the original/default encoding).
+                for i in range(len(variables)):
+                    for j in range(i + 1, len(variables)):
+                        cnf.add_clause([-variables[i], -variables[j]])
+            else:
+                _add_sequential_at_most_one(cnf, variables)
     timing("end", "exactly_one")
 
     def add_overlap_clauses(direction, dx, dy):
@@ -106,3 +115,16 @@ def patterns_to_cnf(
     timing("end", "compatibility")
 
     return cnf
+
+
+def _add_sequential_at_most_one(cnf: CnfBuilder, variables: list[int]) -> None:
+    """Sinz sequential-counter encoding of at-most-one over ``variables``."""
+    if len(variables) <= 1:
+        return
+    sequential = [cnf.new_aux_var() for _ in range(len(variables) - 1)]
+    cnf.add_clause([-variables[0], sequential[0]])
+    for index in range(1, len(variables) - 1):
+        cnf.add_clause([-variables[index], sequential[index]])
+        cnf.add_clause([-sequential[index - 1], sequential[index]])
+        cnf.add_clause([-variables[index], -sequential[index - 1]])
+    cnf.add_clause([-variables[-1], -sequential[-1]])

@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset=utf-8><title>Zelda 3x3 sequential probe</title><style>body{font:16px/1.5 system-ui;margin:2rem;color:#172033}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}figure{margin:0}img{width:100%;image-rendering:pixelated}table{border-collapse:collapse}td,th{padding:.5rem;border:1px solid #9aa7b8;text-align:right}td:first-child,th:first-child{text-align:left}</style></head><body><h1>Zelda overlapping 3×3 sequential-encoding checkpoint</h1><p>Status: <b>timeout</b></p><figure><img src=source.png><figcaption>Zelda source; no generated output because solve timed out.</figcaption></figure><h2>Formula</h2><table><tr><th>Quantity</th><th>Value</th></tr><tr><td>Placement variables</td><td>1183200</td></tr><tr><td>Auxiliary variables</td><td>1182800</td></tr><tr><td>Total variables</td><td>2366000</td></tr><tr><td>At-least-one clauses</td><td>400</td></tr><tr><td>Sequential at-most-one clauses</td><td>3548000</td></tr><tr><td>Compatibility/support clauses</td><td>2248080</td></tr><tr><td>Total clauses</td><td>5796480</td></tr></table><h2>Result</h2><pre>{
+  "solve_entered": true,
+  "status": "TIMEOUT",
+  "conflicts": null,
+  "decisions": null,
+  "observer_backtracks": null,
+  "output_image": null
+}</pre><h2>Four fidelity measurements</h2><table></table><h2>Timings</h2><pre>{
+  "source_loading": 0.357744913,
+  "wrapped_pattern_extraction": 0.23929612199999994,
+  "compatibility": 10.469795941,
+  "cnf_variables": 0.9988152750000001,
+  "cnf_exactly_one": 4.345552693,
+  "cnf_compatibility": 11.823669198000001,
+  "total_cnf_construction": 17.213258213000003,
+  "cadical_bootstrap": 7.910297428000003,
+  "mapping_construction": 4.652428530000002,
+  "observer_attach": 1.6218340870000034,
+  "observe_registration": 0.4541464469999994,
+  "solver_solve_lower_bound": 136.219008,
+  "total_wall_watchdog": 180.0
+}</pre><p><a href=context-seed-0.json>Raw JSON</a> · <a href=context-seed-0-timing.log>Timing log</a></p></body></html>

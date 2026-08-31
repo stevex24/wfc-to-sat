@@ -1,0 +1,29 @@
+[0.000102s] Zelda overlapping-3x3 Stage 1 probe: seed=0 heuristic=context selection=lexical output=20x20
+[0.000226s] source tile loading start
+[0.314443s] source tile loading complete: 0.314186s
+[0.314525s] periodic wrapped 3x3 pattern extraction start
+[0.553488s] periodic wrapped 3x3 pattern extraction complete: 0.238920s
+[0.553551s] context-frequency construction start
+[1.081697s] context-frequency construction complete: 0.528112s
+[1.081768s] overlap compatibility construction start
+[11.559063s] overlap compatibility construction complete: 10.477252s
+[11.567954s] pattern_count: 2958
+[11.568010s] source_pattern_occurrences: 22528
+[11.568153s] compatibility_right_links: 24701
+[11.568240s] compatibility_down_links: 28287
+[11.568258s] output_cells: 400
+[11.568273s] output_adjacency_edges: 760
+[11.568287s] sat_variables: 1183200
+[11.568300s] at_least_one_clauses: 400
+[11.568314s] pairwise_at_most_one_clauses: 1749361200
+[11.568329s] exactly_one_clauses: 1749361600
+[11.568344s] compatibility_support_clauses: 2248080
+[11.568359s] total_clauses: 1751609680
+[11.568373s] clause_container_lower_bound_bytes: 140128774400
+[11.568395s] clause_container_lower_bound_gib: 130.50509095191956
+[11.568437s] measured_peak_rss_bytes: 74989568
+[11.568452s] safety_clause_limit: 10000000
+[11.568466s] SAFETY STOP before SAT variable/CNF allocation: unchanged formula exceeds clause limit
+[11.568889s] status: blocked_before_cnf_allocation
+[11.568916s] total wall-clock: 11.568484s
+[11.568960s] raw_json: context-sensitive-results/detailed-comparison/zelda-3x3/zelda-3x3-context-seed-0.json

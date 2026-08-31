@@ -1,0 +1,43 @@
+[0.000410s] Zelda overlapping-3x3 sequential probe: seed=0 context lexical 20x20
+[0.000466s] source tile loading start
+[0.358255s] source tile loading complete: 0.357745s
+[0.358346s] peak RSS after source tile loading: 46260224 bytes
+[0.358748s] wrapped 3x3 pattern extraction start
+[0.598077s] wrapped 3x3 pattern extraction complete: 0.239296s
+[0.598164s] peak RSS after wrapped 3x3 pattern extraction: 50200576 bytes
+[0.598555s] overlap compatibility construction start
+[11.068385s] overlap compatibility construction complete: 10.469796s
+[11.068473s] peak RSS after overlap compatibility construction: 51433472 bytes
+[11.068887s] total sequential CNF construction start
+[11.068936s] CNF variables start
+[12.067761s] CNF variables complete: 0.998815s; added 0 clauses
+[12.067857s] CNF exactly_one start
+[16.413431s] CNF exactly_one complete: 4.345553s; added 3548400 clauses
+[16.413589s] CNF compatibility start
+[28.237267s] CNF compatibility complete: 11.823669s; added 2248080 clauses
+[28.282185s] total sequential CNF construction complete: 17.213258s
+[28.321166s] peak RSS after total sequential CNF construction: 1140293632 bytes
+[28.321691s] patterns: 2958
+[28.321719s] output_cells: 400
+[28.321734s] placement_variables: 1183200
+[28.321759s] auxiliary_variables: 1182800
+[28.321773s] total_variables: 2366000
+[28.321786s] at_least_one_clauses: 400
+[28.321800s] sequential_at_most_one_clauses: 3548000
+[28.321815s] compatibility_support_clauses: 2248080
+[28.321829s] total_clauses: 5796480
+[28.900746s] CaDiCaL bootstrap start
+[36.811263s] CaDiCaL bootstrap complete: 7.910297s
+[36.905137s] peak RSS after CaDiCaL bootstrap: 2327851008 bytes
+[36.907241s] mapping construction/validation start
+[41.559713s] mapping construction/validation complete: 4.652429s
+[41.559785s] peak RSS after mapping construction/validation: 2449702912 bytes
+[41.560227s] DomainObserver construction/connection start
+[43.182106s] DomainObserver construction/connection complete: 1.621834s
+[43.204752s] peak RSS after DomainObserver construction/connection: 2454093824 bytes
+[43.314526s] placement observe() registration start
+[43.768753s] placement observe() registration complete: 0.454146s
+[43.768857s] peak RSS after placement observe() registration: 2454093824 bytes
+[43.780992s] solver.solve() start
+[180.000000s] external watchdog timeout; solver.solve() did not return
+[180.000000s] external watchdog timeout; solver.solve() did not return

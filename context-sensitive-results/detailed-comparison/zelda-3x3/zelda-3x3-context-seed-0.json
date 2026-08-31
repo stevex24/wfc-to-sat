@@ -1,0 +1,53 @@
+{
+  "configuration": {
+    "source": "examples/context-sensitive/zelda-map-authors.png",
+    "pattern_size": 3,
+    "source_extraction": "periodic (wrap both axes)",
+    "output": "20x20 placement grid",
+    "output_boundary": "finite/nonperiodic",
+    "seed": 0,
+    "heuristic": "context",
+    "selection": "lexical",
+    "solver": "PySAT Cadical195 + DomainObserver",
+    "encoding": "unchanged pairwise exactly-one + support compatibility"
+  },
+  "status": "blocked_before_cnf_allocation",
+  "timings_seconds": {
+    "source_tile_loading": 0.31418639299999995,
+    "pattern_extraction": 0.23892022499999999,
+    "context_frequency": 0.528112412,
+    "compatibility": 10.477252335000001,
+    "sat_variable_allocation": null,
+    "exactly_one_construction": null,
+    "compatibility_clause_construction": null,
+    "total_cnf_construction": null,
+    "cadical_bootstrap": null,
+    "observer_attach": null,
+    "observe_registration": null,
+    "solver_solve": null,
+    "total_wall": 11.568484371
+  },
+  "formula": {
+    "pattern_count": 2958,
+    "source_pattern_occurrences": 22528,
+    "compatibility_right_links": 24701,
+    "compatibility_down_links": 28287,
+    "output_cells": 400,
+    "output_adjacency_edges": 760,
+    "sat_variables": 1183200,
+    "at_least_one_clauses": 400,
+    "pairwise_at_most_one_clauses": 1749361200,
+    "exactly_one_clauses": 1749361600,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 1751609680,
+    "clause_container_lower_bound_bytes": 140128774400,
+    "clause_container_lower_bound_gib": 130.50509095191956,
+    "measured_peak_rss_bytes": 74989568,
+    "safety_clause_limit": 10000000
+  },
+  "solver_result": null,
+  "conflicts": null,
+  "decisions": null,
+  "observer_backtracks": null,
+  "output_image": null
+}

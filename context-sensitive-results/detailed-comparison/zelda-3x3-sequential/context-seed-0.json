@@ -1,0 +1,62 @@
+{
+  "configuration": {
+    "source": "examples/context-sensitive/zelda-map-authors.png",
+    "pattern_size": 3,
+    "source_extraction": "periodic",
+    "output": "20x20 placements",
+    "output_boundary": "finite/nonperiodic",
+    "seed": 0,
+    "heuristic": "context",
+    "selection": "lexical",
+    "solver": "PySAT Cadical195 + DomainObserver",
+    "adjacency_encoding": "support",
+    "exactly_one_encoding": "sequential"
+  },
+  "status": "timeout",
+  "formula": {
+    "patterns": 2958,
+    "output_cells": 400,
+    "placement_variables": 1183200,
+    "auxiliary_variables": 1182800,
+    "total_variables": 2366000,
+    "at_least_one_clauses": 400,
+    "sequential_at_most_one_clauses": 3548000,
+    "compatibility_support_clauses": 2248080,
+    "total_clauses": 5796480
+  },
+  "timings_seconds": {
+    "source_loading": 0.357744913,
+    "wrapped_pattern_extraction": 0.23929612199999994,
+    "compatibility": 10.469795941,
+    "cnf_variables": 0.9988152750000001,
+    "cnf_exactly_one": 4.345552693,
+    "cnf_compatibility": 11.823669198000001,
+    "total_cnf_construction": 17.213258213000003,
+    "cadical_bootstrap": 7.910297428000003,
+    "mapping_construction": 4.652428530000002,
+    "observer_attach": 1.6218340870000034,
+    "observe_registration": 0.4541464469999994,
+    "solver_solve_lower_bound": 136.219008,
+    "total_wall_watchdog": 180.0
+  },
+  "result": {
+    "solve_entered": true,
+    "status": "TIMEOUT",
+    "conflicts": null,
+    "decisions": null,
+    "observer_backtracks": null,
+    "output_image": null
+  },
+  "metrics": {},
+  "total_wall_seconds_so_far": 180.0,
+  "peak_rss_bytes": {
+    "source tile loading": 46260224,
+    "wrapped 3x3 pattern extraction": 50200576,
+    "overlap compatibility construction": 51433472,
+    "total sequential CNF construction": 1140293632,
+    "CaDiCaL bootstrap": 2327773184,
+    "mapping construction/validation": 2449702912,
+    "DomainObserver construction/connection": 2454093824,
+    "placement observe() registration": 2454093824
+  }
+}
