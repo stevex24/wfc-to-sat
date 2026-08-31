@@ -32,21 +32,29 @@ class CnfBuilder:
 
 
 def patterns_to_cnf(
-    patterns, allowed, width: int, height: int, *, adjacency_encoding="forbidden-pairs"
+    patterns, allowed, width: int, height: int, *, adjacency_encoding="forbidden-pairs",
+    timing_hook=None,
 ) -> CnfBuilder:
     if adjacency_encoding not in {"forbidden-pairs", "support"}:
         raise ValueError("unknown adjacency encoding")
     cnf = CnfBuilder()
 
+    def timing(event, stage):
+        if timing_hook is not None:
+            timing_hook(event, stage, cnf)
+
     # Create variables:
     # variable (x, y, pattern_id) means:
     # pattern_id is placed at position (x, y).
+    timing("start", "variables")
     for y in range(height):
         for x in range(width):
             for pattern in patterns:
                 cnf.var_for(x, y, pattern.id)
+    timing("end", "variables")
 
     # Exactly one pattern per output position.
+    timing("start", "exactly_one")
     for y in range(height):
         for x in range(width):
 
@@ -63,6 +71,7 @@ def patterns_to_cnf(
                         -cnf.var_for(x, y, patterns[i].id),
                         -cnf.var_for(x, y, patterns[j].id),
                     ])
+    timing("end", "exactly_one")
 
     def add_overlap_clauses(direction, dx, dy):
         for y in range(height):
@@ -91,7 +100,9 @@ def patterns_to_cnf(
                                     -cnf.var_for(nx, ny, p2.id),
                                 ])
 
+    timing("start", "compatibility")
     add_overlap_clauses("right", 1, 0)
     add_overlap_clauses("down", 0, 1)
+    timing("end", "compatibility")
 
     return cnf

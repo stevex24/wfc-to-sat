@@ -1,0 +1,31 @@
+[0.000142s] Zelda 1x1 timing probe: seed=0 heuristic=uniform selection=lexical output=20x20
+[0.000231s] source preprocessing start
+[0.724574s] source preprocessing complete: 0.724305s
+[0.724643s] model / adjacency / context construction start
+[1.261637s] model / adjacency / context construction complete: 0.536971s
+[1.261947s] total CNF construction start
+[1.261981s] SAT variable allocation start
+[1.288010s] SAT variable allocation complete: 0.025994s
+[1.288077s] exactly-one clause construction start
+[3.622798s] exactly-one clause construction complete: 2.334696s
+[3.622897s] compatibility/support clause construction start
+[3.773386s] compatibility/support clause construction complete: 0.150444s
+[3.773469s] total CNF construction complete: 2.511493s
+[3.773506s] mapping construction start
+[3.874181s] mapping construction complete: 0.100648s
+[3.874263s] candidates_per_cell: 90
+[3.874292s] output_cells: 400
+[3.874310s] sat_variables: 36000
+[3.874325s] exactly_one_clauses: 1602400
+[3.874340s] compatibility_clauses: 68400
+[3.874355s] total_clauses: 1670800
+[3.881929s] CaDiCaL bootstrap start
+[5.185645s] CaDiCaL bootstrap complete: 1.303664s
+[5.185730s] DomainObserver instantiate/connect start
+[5.683011s] DomainObserver instantiate/connect complete: 0.497231s
+[5.683124s] domain_observer_attached: True
+[5.683151s] observed-variable registration start
+[5.696919s] observed-variable registration complete: 0.013739s
+[5.696984s] observed_variables: 36000
+[5.697014s] solve_entered: True
+[5.697030s] solver.solve() start

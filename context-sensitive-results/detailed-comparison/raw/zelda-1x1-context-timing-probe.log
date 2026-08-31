@@ -1,0 +1,31 @@
+[0.000156s] Zelda 1x1 timing probe: seed=0 heuristic=context selection=lexical output=20x20
+[0.000243s] source/model preprocessing start
+[1.582739s] source/model preprocessing complete: 1.582488s
+[1.583069s] CNF construction start
+[4.104521s] CNF construction complete: 2.521446s
+[4.104573s] mapping construction start
+[4.210813s] mapping construction complete: 0.106231s
+[4.210886s] sat_variables: 36000
+[4.210904s] exactly_one_clauses: 1602400
+[4.210918s] compatibility_clauses: 68400
+[4.210932s] total_clauses: 1670800
+[4.218265s] CaDiCaL bootstrap start
+[5.503497s] CaDiCaL bootstrap complete: 1.285223s
+[5.503592s] DomainObserver construction/connection start
+[5.981370s] DomainObserver construction/connection complete: 0.477759s
+[5.981446s] domain_observer_attached: True
+[5.981464s] observed-variable registration start
+[5.995394s] observed-variable registration complete: 0.013914s
+[5.995524s] observed_variables: 36000
+[5.995548s] solve_entered: True
+[5.995565s] solver.solve() start
+[6.252108s] solver.solve() complete: 0.256537s
+[6.252160s] solver_result: SAT
+[6.252183s] cadical_conflicts: 0
+[6.252209s] cadical_decisions: 376
+[6.252222s] observer_backtrack_callbacks: 0
+[6.252235s] decode/render start
+[6.267063s] decode/render complete: 0.014821s
+[6.267126s] output_image: context-sensitive-results/detailed-comparison/images/zelda-1x1-context-sat-seed-0-timing-probe.png
+[6.376610s] total wall-clock complete: 6.376598s
+[6.376731s] SUMMARY_JSON {"heuristic": "context", "timings_seconds": {"cadical_bootstrap": 1.2852231169999992, "cnf_construction": 2.52144556, "decode_render": 0.014820637999999775, "mapping_construction": 0.10623148100000002, "observe_variables": 0.01391386599999933, "observer_attach": 0.4777590380000003, "solve": 0.2565368750000001, "source_model_preprocessing": 1.5824880819999998, "total_wall": 6.376597953000001}}
