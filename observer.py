@@ -29,6 +29,7 @@ class DomainObserver(Propagator):
         heuristic: str = "solver",
         seed: int = 0,
         selection: str = "min_entropy",
+        emit_events: bool = True,
     ) -> None:
         super().__init__()
         if heuristic not in {"solver", "wfc", "uniform", "frequency", "context"}:
@@ -37,6 +38,7 @@ class DomainObserver(Propagator):
             raise ValueError(f"unknown selection heuristic {selection!r}")
         self.mapping = mapping
         self.emit = emit
+        self.emit_events = emit_events
         self.heuristic = heuristic
         self.decision_heuristic = "frequency" if heuristic == "wfc" else heuristic
         self.selection_heuristic = selection
@@ -55,6 +57,7 @@ class DomainObserver(Propagator):
         self.pattern_bits = tuple(1 << index for index in range(len(self.pattern_ids)))
         self.cell_count = mapping.width * mapping.height
         self.domains = [self.full_domain] * self.cell_count
+        self.domain_sizes = [len(self.pattern_ids)] * self.cell_count
         self.selected: list[int | None] = [None] * self.cell_count
         self.neighbor_cells = tuple(
             tuple(
@@ -70,6 +73,7 @@ class DomainObserver(Propagator):
         self.restart_events = 0
         self.undone_assignments = 0
         self.trails: list[list[tuple[int, int, int | None]]] = [[]]
+        self.size_trails: list[list[int]] = [[]]
         self.var_info: dict[int, tuple[int, int, int, int]] = {}
         self.var_for_cell_pattern: dict[tuple[int, int], int] = {}
         for placement in mapping.placements:
@@ -84,25 +88,35 @@ class DomainObserver(Propagator):
             return
         cell, x, y, pattern_index = info
         old_domain, old_selected = self.domains[cell], self.selected[cell]
+        old_size = self.domain_sizes[cell]
+        bit = self.pattern_bits[pattern_index]
         if lit > 0:
-            new_domain = self.pattern_bits[pattern_index]
+            new_domain = bit
+            new_size = 1
             new_selected: int | None = pattern_index
         else:
-            new_domain = old_domain & ~(1 << pattern_index)
+            present = bool(old_domain & bit)
+            new_domain = old_domain & ~bit
+            new_size = old_size - int(present)
             new_selected = old_selected
         self._ensure_level(self.current_level)
         self.trails[self.current_level].append((cell, old_domain, old_selected))
-        self.domains[cell], self.selected[cell] = new_domain, new_selected
-        pattern_id = self.pattern_ids[pattern_index]
-        if lit > 0:
-            self.emit(["p", x, y, pattern_id, self.current_level])
-        else:
-            self.emit(["n", x, y, pattern_id, self.current_level, _bit_count(new_domain)])
+        self.size_trails[self.current_level].append(old_size)
+        self.domains[cell], self.selected[cell], self.domain_sizes[cell] = (
+            new_domain, new_selected, new_size,
+        )
+        if self.emit_events:
+            pattern_id = self.pattern_ids[pattern_index]
+            if lit > 0:
+                self.emit(["p", x, y, pattern_id, self.current_level])
+            else:
+                self.emit(["n", x, y, pattern_id, self.current_level, new_size])
 
     def on_new_level(self) -> None:
         self.current_level += 1
         self._ensure_level(self.current_level)
-        self.emit(["l", self.current_level])
+        if self.emit_events:
+            self.emit(["l", self.current_level])
 
     def on_backtrack(self, to: int) -> None:
         if to < 0:
@@ -114,21 +128,29 @@ class DomainObserver(Propagator):
         if to > self.current_level:
             self._ensure_level(to)
             self.current_level = to
-            self.emit(["b", to, 0])
+            if self.emit_events:
+                self.emit(["b", to, 0])
             return
         undone = 0
         for level in range(self.current_level, to, -1):
-            for cell, old_domain, old_selected in reversed(self.trails[level]):
-                self.domains[cell], self.selected[cell] = old_domain, old_selected
+            for (cell, old_domain, old_selected), old_size in zip(
+                reversed(self.trails[level]), reversed(self.size_trails[level]),
+            ):
+                self.domains[cell], self.selected[cell], self.domain_sizes[cell] = (
+                    old_domain, old_selected, old_size,
+                )
                 undone += 1
             self.trails[level].clear()
+            self.size_trails[level].clear()
         self.current_level = to
         self.backtrack_events += 1
         self.undone_assignments += undone
-        self.emit(["b", to, undone])
+        if self.emit_events:
+            self.emit(["b", to, undone])
         if to == 0:
             self.restart_events += 1
-            self.emit(["r", undone])
+            if self.emit_events:
+                self.emit(["r", undone])
 
     def check_model(self, model: list[int]) -> bool:
         positive = {literal for literal in model if literal > 0}
@@ -221,6 +243,7 @@ class DomainObserver(Propagator):
     def _ensure_level(self, level: int) -> None:
         while len(self.trails) <= level:
             self.trails.append([])
+            self.size_trails.append([])
 
 
 def _bit_count(value: int) -> int:

@@ -253,7 +253,10 @@ def main(argv=None):
         mapping = probe.timed("mapping_construction", "mapping construction/validation", make_mapping)
 
         def attach_observer():
-            observer = DomainObserver(mapping, lambda event: None, heuristic="context", seed=0, selection="lexical")
+            observer = DomainObserver(
+                mapping, lambda event: None, heuristic="context", seed=0,
+                selection="lexical", emit_events=False,
+            )
             solver.connect_propagator(observer)
             return observer
 

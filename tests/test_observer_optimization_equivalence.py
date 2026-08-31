@@ -14,6 +14,54 @@ from wfc_to_sat.context_frequency import UNK
 class LegacyDomainObserver(DomainObserver):
     """The pre-optimization selection/context implementation as an oracle."""
 
+    def on_assignment(self, lit, fixed=False):
+        info = self.var_info.get(abs(lit))
+        if info is None:
+            return
+        cell, x, y, pattern_index = info
+        old_domain, old_selected = self.domains[cell], self.selected[cell]
+        if lit > 0:
+            new_domain = self.pattern_bits[pattern_index]
+            new_selected = pattern_index
+        else:
+            new_domain = old_domain & ~(1 << pattern_index)
+            new_selected = old_selected
+        self._ensure_level(self.current_level)
+        self.trails[self.current_level].append((cell, old_domain, old_selected))
+        self.domains[cell], self.selected[cell] = new_domain, new_selected
+        pattern_id = self.pattern_ids[pattern_index]
+        if lit > 0:
+            self.emit(["p", x, y, pattern_id, self.current_level])
+        else:
+            self.emit(["n", x, y, pattern_id, self.current_level, _bit_count(new_domain)])
+
+    def on_new_level(self):
+        self.current_level += 1
+        self._ensure_level(self.current_level)
+        self.emit(["l", self.current_level])
+
+    def on_backtrack(self, to):
+        if to < 0:
+            raise ValueError(f"invalid backtrack level {to}")
+        if to > self.current_level:
+            self._ensure_level(to)
+            self.current_level = to
+            self.emit(["b", to, 0])
+            return
+        undone = 0
+        for level in range(self.current_level, to, -1):
+            for cell, old_domain, old_selected in reversed(self.trails[level]):
+                self.domains[cell], self.selected[cell] = old_domain, old_selected
+                undone += 1
+            self.trails[level].clear()
+        self.current_level = to
+        self.backtrack_events += 1
+        self.undone_assignments += undone
+        self.emit(["b", to, undone])
+        if to == 0:
+            self.restart_events += 1
+            self.emit(["r", undone])
+
     def decide(self):
         if self.heuristic == "solver":
             return 0
@@ -138,6 +186,36 @@ class ObserverOptimizationEquivalenceTests(unittest.TestCase):
         self.assertEqual(old.selected, new.selected)
         self.assertEqual(old.trails, new.trails)
         self.assertEqual(old.undone_assignments, new.undone_assignments)
+        self.assertEqual(new.domain_sizes, [_bit_count(domain) for domain in new.domains])
+
+    def test_event_disabled_mode_changes_only_diagnostic_emission(self):
+        mapping = make_problem()
+        events = []
+        emitting = DomainObserver(
+            mapping, events.append, heuristic="context", seed=9, selection="lexical",
+        )
+        quiet = DomainObserver(
+            mapping, lambda event: self.fail("quiet observer emitted an event"),
+            heuristic="context", seed=9, selection="lexical", emit_events=False,
+        )
+        decisions = [[], []]
+        for index, observer in enumerate((emitting, quiet)):
+            observer.on_new_level()
+            decisions[index].append(observer.decide())
+            observer.on_assignment(decisions[index][-1])
+            observer.on_new_level()
+            decisions[index].append(observer.decide())
+            observer.on_assignment(decisions[index][-1])
+            observer.on_backtrack(1)
+            decisions[index].append(observer.decide())
+        self.assertTrue(events)
+        self.assertEqual(decisions[0], decisions[1])
+        self.assertEqual(emitting.domains, quiet.domains)
+        self.assertEqual(emitting.domain_sizes, quiet.domain_sizes)
+        self.assertEqual(emitting.selected, quiet.selected)
+        self.assertEqual(emitting.trails, quiet.trails)
+        self.assertEqual(emitting.size_trails, quiet.size_trails)
+        self.assertEqual(emitting.undone_assignments, quiet.undone_assignments)
 
     def test_cadical_conflict_backtrack_trace_and_final_hash_match(self):
         from pysat.solvers import Cadical195
