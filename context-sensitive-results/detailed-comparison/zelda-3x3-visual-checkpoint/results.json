@@ -1,0 +1,53 @@
+{
+  "configuration": {
+    "source_extraction": "periodic/wrapped",
+    "output_placements": [
+      20,
+      20
+    ],
+    "pattern_size": 3,
+    "heuristic": "context",
+    "seed": 0,
+    "sat_exactly_one": "sequential"
+  },
+  "ordinary_wfc": {
+    "selection": "lexical",
+    "status": "SAT",
+    "runtime_seconds": 175.440486614,
+    "observations": 309,
+    "contradictions": 0,
+    "hard_constraints_verified": true,
+    "metrics": {
+      "pattern_frequency_kl": 2.7682446294666105,
+      "pattern_edge_frequency_kl": Infinity,
+      "decoded_tile_frequency_kl": 1.195804617697829,
+      "decoded_tile_edge_frequency_kl": 1.4941481267490138
+    },
+    "image": "context-sensitive-results/detailed-comparison/zelda-3x3-visual-checkpoint/ordinary-wfc-context-lexical-seed-0.png",
+    "image_sha256": "be86d5c9d57b86fbf0bedf6888fc46362722edb878e7deba86f141affd386e97"
+  },
+  "wfc_as_sat": {
+    "selection": "min_entropy",
+    "status": "SAT",
+    "solve_seconds": 56.554766975,
+    "conflicts": 13,
+    "decisions": 228,
+    "observer_backtracks": 13,
+    "undone_assignments": 0,
+    "hard_constraints_verified": true,
+    "metrics": {
+      "pattern_frequency_kl": 1.9874546702566354,
+      "pattern_edge_frequency_kl": Infinity,
+      "decoded_tile_frequency_kl": 0.6041930375705983,
+      "decoded_tile_edge_frequency_kl": 0.7993849022403684
+    },
+    "image": "context-sensitive-results/detailed-comparison/zelda-3x3-visual-checkpoint/wfc-as-sat-context-min-entropy-seed-0.png",
+    "image_sha256": "42211dcbea613c7f23cd0e874f2def20003d23a724ce6439ea65fc366cb941c7"
+  },
+  "lexical_sat": {
+    "status": "TIMEOUT",
+    "image": null
+  },
+  "total_wall_seconds_so_far": 107.60106461699999,
+  "status": "completed"
+}

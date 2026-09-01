@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset=utf-8>
+<title>Zelda 3×3 visual checkpoint</title><style>
+body{font:17px/1.5 system-ui;margin:2rem;background:#eef2f7;color:#172033}main{max-width:1500px;margin:auto}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1.5rem}figure{margin:0;background:white;border:1px solid #bcc8d8;padding:1rem}img{display:block;width:100%;height:auto;image-rendering:pixelated}figcaption{font-size:1.15rem;font-weight:700;margin-top:.7rem}table{border-collapse:collapse;width:100%;margin-top:1rem}th,td{border:1px solid #bcc8d8;padding:.45rem;text-align:left}td{font-family:ui-monospace,monospace}.timeout{background:#fff1f2;border:2px solid #be123c;padding:1rem;font-weight:700}.diagnostic{color:#9a3412}.missing{padding:8rem 1rem;text-align:center;background:#e2e8f0}</style></head>
+<body><main><h1>Zelda overlapping 3×3 visual checkpoint</h1>
+<p>Seed 0; wrapped source extraction; 20×20 placement grid; Context-sensitive weighting. Generated output boundaries are finite/nonperiodic.</p>
+<div class=gallery>
+<figure><img src="source.png" alt="Zelda source"><figcaption>Zelda source</figcaption></figure>
+<figure><img src="ordinary-wfc-context-lexical-seed-0.png" alt="Ordinary WFC Context lexical seed 0"><figcaption>Ordinary WFC — Context — LEXICAL</figcaption><table><tr><th>pattern frequency kl</th><td>2.76824462947</td></tr><tr><th>pattern edge frequency kl</th><td>inf</td></tr><tr><th>decoded tile frequency kl</th><td>1.1958046177</td></tr><tr><th>decoded tile edge frequency kl</th><td>1.49414812675</td></tr></table><p>Status: SAT · runtime: 175.440486614 s</p></figure>
+<figure><img src="wfc-as-sat-context-min-entropy-seed-0.png" alt="WFC-as-SAT Context min-entropy diagnostic seed 0"><figcaption class=diagnostic>WFC-as-SAT — Context — MIN-ENTROPY DIAGNOSTIC</figcaption><table><tr><th>pattern frequency kl</th><td>1.98745467026</td></tr><tr><th>pattern edge frequency kl</th><td>inf</td></tr><tr><th>decoded tile frequency kl</th><td>0.604193037571</td></tr><tr><th>decoded tile edge frequency kl</th><td>0.79938490224</td></tr></table><p>Status: SAT · solve: 56.554766975 s · conflicts: 13 · decisions: 228 · observer backtracks: 13</p></figure>
+</div><p class=timeout>WFC-as-SAT — Context — LEXICAL: TIMEOUT, no image.</p>
+<p><a href="results.json">Raw results JSON</a> · <a href="run.log">Flushed run log</a></p>
+</main></body></html>

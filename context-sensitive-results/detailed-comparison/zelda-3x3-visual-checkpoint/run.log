@@ -1,0 +1,15 @@
+[0.010022s] source loading start
+[0.522620s] wrapped 3x3 pattern extraction start
+[0.763956s] pattern extraction complete: 2958 patterns
+[0.764429s] compatibility construction start
+[14.191668s] ordinary WFC Context lexical seed 0 start
+[189.726075s] ordinary WFC complete: SAT in 175.440487s
+[0.000820s] source loading start
+[0.301347s] wrapped 3x3 pattern extraction start
+[0.546581s] pattern extraction complete: 2958 patterns
+[0.547093s] compatibility construction start
+[13.892211s] sequential CNF construction start
+[35.148296s] Cadical195 bootstrap start
+[45.222688s] WFC-as-SAT Context min-entropy diagnostic solve start
+[105.698348s] min-entropy SAT complete: SAT in 56.554767s
+[107.601023s] HTML checkpoint complete: /Users/stevecross/wfc-to-sat/context-sensitive-results/detailed-comparison/zelda-3x3-visual-checkpoint/index.html
