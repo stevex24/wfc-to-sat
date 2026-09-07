@@ -295,9 +295,10 @@ def write_outputs(records, summaries, source, rgba, model, metadata):
     cw = by_condition[("context", "ordinary WFC")]
     cs = by_condition[("context", "WFC-as-SAT")]
     pair_details = {}
+    run_count = len(metadata["seeds"])
     for heuristic in HEURISTICS:
         differing_sat = []
-        for seed in range(100):
+        for seed in metadata["seeds"]:
             wfc = next(r for r in records if r["seed"] == seed and r["decision"] == heuristic and r["engine"] == "ordinary WFC")
             sat = next(r for r in records if r["seed"] == seed and r["decision"] == heuristic and r["engine"] == "WFC-as-SAT")
             if wfc["output"] != sat["output"]:
@@ -312,15 +313,15 @@ def write_outputs(records, summaries, source, rgba, model, metadata):
     answers = f"""<h2>Direct answers</h2><ol>
 <li><b>Frequency comparison:</b> ordinary/SAT pooled tile KL is {fw['pooled_tile_kl']:.6g}/{fs['pooled_tile_kl']:.6g}; pooled edge KL is {fw['pooled_edge_kl']:.6g}/{fs['pooled_edge_kl']:.6g}. The aggregate distributions are close, but no paired output is exactly identical.</li>
 <li><b>Context comparison:</b> ordinary/SAT pooled tile KL is {cw['pooled_tile_kl']:.6g}/{cs['pooled_tile_kl']:.6g}; pooled edge KL is {cw['pooled_edge_kl']:.6g}/{cs['pooled_edge_kl']:.6g}. The aggregate distributions are also close.</li>
-<li><b>Exact matches:</b> Frequency has {fs['exact_output_matches']}/100; Context has {cs['exact_output_matches']}/100 (seed 0).</li>
+<li><b>Exact matches:</b> Frequency has {fs['exact_output_matches']}/{run_count}; Context has {cs['exact_output_matches']}/{run_count} (seed 0).</li>
 <li><b>Conflicts when images differ:</b> Frequency has {pair_details['frequency'][1]} conflict/backtracking runs among {pair_details['frequency'][0]} differences. Context has {pair_details['context'][1]} among {pair_details['context'][0]}; its other {pair_details['context'][2]} differences occurred without a conflict. Difference alone therefore does not prove backtracking.</li>
 <li><b>Context advantage:</b> SAT preserves the strong pooled resemblance advantage, especially edge KL ({cs['pooled_edge_kl']:.6g} Context versus {fs['pooled_edge_kl']:.6g} Frequency). Mean and median edge KL agree. Per-run tile KL is more variable and is not uniformly better.</li>
 <li><b>Seed 0 representativeness:</b> Frequency SAT tile/edge KL is {frequency_seed0['tile_kl']:.6g}/{frequency_seed0['edge_kl']:.6g}; Context SAT is {context_seed0['tile_kl']:.6g}/{context_seed0['edge_kl']:.6g}. Both lie within their observed distributions. Context seed 0 is better than its medians but is not an extreme best case.</li>
-<li><b>Timeouts:</b> 0/100 for both SAT heuristics. Frequency has a longer solve-time tail (maximum {fs['solve_seconds']['max']:.3f}s) than Context ({cs['solve_seconds']['max']:.3f}s).</li>
+<li><b>Timeouts:</b> {fs['timeouts']}/{run_count} Frequency; {cs['timeouts']}/{run_count} Context. Frequency has a longer solve-time tail (maximum {fs['solve_seconds']['max']:.3f}s) than Context ({cs['solve_seconds']['max']:.3f}s).</li>
 </ol><p>These are matched-seed and distributional comparisons, not a claim that ordinary WFC and WFC-as-SAT are equivalent algorithms.</p>"""
     REPORT.write_text(f"""<!doctype html><html><head><meta charset=utf-8><title>Zelda 1x1 weighted matched experiment</title>
 <style>body{{font:15px/1.45 system-ui;margin:2rem;color:#172033;background:#f4f6fa}}main{{max-width:1500px;margin:auto}}table{{border-collapse:collapse;background:white}}th,td{{border:1px solid #9aa7b8;padding:.45rem;text-align:right}}th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){{text-align:left}}.gallery{{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:1rem}}figure{{margin:0;background:white;padding:.7rem;border:1px solid #bdc7d4}}img{{width:100%;image-rendering:pixelated}}.source{{max-width:900px}}.note{{background:#fff7d6;border-left:5px solid #d09b00;padding:1rem}}</style></head><body><main>
-<h1>Zelda 1x1: matched weighted WFC and WFC-as-SAT</h1><p>100 fixed seeds (0–99), 20×20 output, lexical selection, finite/nonperiodic boundary. SAT uses DomainObserver with CaDiCaL 1.9.5. Each SAT seed had a {metadata['sat_timeout_seconds']}-second worker timeout; failures and timeouts were retained.</p>
+<h1>Zelda 1x1: matched weighted WFC and WFC-as-SAT</h1><p>{run_count} fixed seeds (0–{run_count - 1}), 20×20 output, lexical selection, finite/nonperiodic boundary. SAT uses DomainObserver with CaDiCaL 1.9.5. Each SAT seed had a {metadata['sat_timeout_seconds']}-second worker timeout; failures and timeouts were retained.</p>
 <figure class=source><img src='images/zelda-1x1-weighted/source.png'><figcaption>Source Zelda map</figcaption></figure>
 <h2>Results</h2><table><thead><tr><th>Heuristic</th><th>Engine</th><th>Success</th><th>Timeout</th><th>Failure</th><th>Pooled tile KL</th><th>Mean tile KL</th><th>Median tile KL</th><th>Pooled edge KL</th><th>Mean edge KL</th><th>Median edge KL</th><th>Mean runtime s</th><th>Median runtime s</th><th>Mean conflicts</th><th>Mean decisions</th><th>Mean observer backtracks</th><th>Exact matched images</th></tr></thead><tbody>{table_rows}</tbody></table>
 <div class=note><b>Uniform remains incomplete.</b> Its separately diagnosed seed-0 WFC-decision run exceeded 174 seconds. It was not run in this weighted sweep. Plain CaDiCaL is only a diagnostic control and is not substituted for WFC-as-SAT here.</div>
@@ -336,8 +337,6 @@ def main(argv=None):
     parser.add_argument("--sat-timeout", type=float, default=30.0)
     parser.add_argument("--report-only", action="store_true")
     args = parser.parse_args(argv)
-    if args.runs != 100:
-        raise ValueError("this experiment is fixed to exactly 100 seeds")
     source, rgba = tile_source()
     model = WFCModel.from_tile_grid(source)
     if args.report_only:
@@ -355,7 +354,7 @@ def main(argv=None):
     metadata = {
         "source": "examples/context-sensitive/zelda-map-authors.png",
         "pattern_size": 1, "output": "20x20", "boundary": "finite/nonperiodic",
-        "selection": "lexical", "heuristics": list(HEURISTICS), "seeds": list(range(100)),
+        "selection": "lexical", "heuristics": list(HEURISTICS), "seeds": list(range(args.runs)),
         "sat": "PySAT Cadical195 + DomainObserver", "sat_timeout_seconds": args.sat_timeout,
         "variables": CNF.num_vars, "clauses": len(CNF.clauses),
         "exactly_one_clauses": 1602400, "compatibility_support_clauses": 68400,
@@ -363,7 +362,7 @@ def main(argv=None):
     }
     records = []
     context = multiprocessing.get_context("fork")
-    for seed in range(100):
+    for seed in range(args.runs):
         for heuristic in HEURISTICS:
             print(f"seed {seed:02d} {heuristic} ordinary WFC start", flush=True)
             ordinary = run_wfc(model, heuristic, seed)
