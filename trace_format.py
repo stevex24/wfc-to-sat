@@ -70,6 +70,7 @@ class MappingSpec:
     placements: tuple[Placement, ...]
     compatibility: dict[str, dict[int, tuple[int, ...]]] | None = None
     source_pattern_grid: tuple[tuple[int, ...], ...] | None = None
+    structural: dict[str, Any] | None = None
 
     @classmethod
     def load(cls, path: str | Path, num_vars: int | None = None) -> "MappingSpec":
@@ -92,7 +93,10 @@ class MappingSpec:
             raise ValueError("context_data requires mapping version 2")
         compatibility = _parse_compatibility(value.get("compatibility"))
         source_pattern_grid = _parse_source_pattern_grid(value.get("context_data"))
-        result = cls(width, height, patterns, placements, compatibility, source_pattern_grid)
+        structural = value.get("structural")
+        if structural is not None and not isinstance(structural, dict):
+            raise ValueError("mapping structural section must be an object")
+        result = cls(width, height, patterns, placements, compatibility, source_pattern_grid, structural)
         result.validate(num_vars=num_vars)
         return result
 
@@ -146,6 +150,14 @@ class MappingSpec:
             frequencies = {pattern.id: pattern.frequency for pattern in self.patterns}
             if counts != frequencies:
                 raise ValueError("source pattern occurrences must match pattern frequencies")
+        if self.structural is not None:
+            seen = set(variables)
+            for kind in ("in", "anchor", "counter"):
+                for item in self.structural.get(kind, []):
+                    var = int(item["var"])
+                    if var <= 0 or var in seen or (num_vars is not None and var > num_vars):
+                        raise ValueError(f"invalid or duplicate structural variable {var}")
+                    seen.add(var)
 
     def header(self, run: dict[str, Any]) -> dict[str, Any]:
         value: dict[str, Any] = {
@@ -171,6 +183,8 @@ class MappingSpec:
                 "boundary": "unknown",
                 "grid": [list(row) for row in self.source_pattern_grid],
             }
+        if self.structural is not None:
+            value["structural"] = self.structural
         return value
 
     def to_json(self) -> dict[str, Any]:

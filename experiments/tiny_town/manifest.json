@@ -1,0 +1,33 @@
+{
+  "name": "Kenney Tiny Town houses",
+  "source": "https://kenney.nl/assets/tiny-town",
+  "license": "CC0 1.0",
+  "asset_archive": "https://kenney.nl/media/pages/assets/tiny-town/a415fbeb49-1735736916/kenney_tiny-town.zip",
+  "tile_size": 16,
+  "tiles": {
+    "ground": [0, 1, 2],
+    "roof_top_left": [48, 52],
+    "roof_top_inside": [49, 50, 53, 54],
+    "roof_top_right": [51, 55],
+    "roof_left": [60, 64],
+    "roof_inside": [61, 62, 65, 66],
+    "roof_right": [63, 67],
+    "body_left": [72, 76],
+    "body_inside": [73, 74, 77, 78, 84, 85, 88, 89],
+    "body_right": [75, 79]
+  },
+  "house_roles": [
+    "roof_top_left", "roof_top_inside", "roof_top_right",
+    "roof_left", "roof_inside", "roof_right",
+    "body_left", "body_inside", "body_right"
+  ],
+  "style_families": {
+    "cool": [48, 49, 50, 51, 60, 61, 62, 63, 76, 77, 78, 79, 88, 89],
+    "warm": [52, 53, 54, 55, 64, 65, 66, 67, 72, 73, 74, 75, 84, 85]
+  },
+  "notes": {
+    "roof_overhang": "None at tile-grid scale: roof and body use the same left/right columns.",
+    "separation": "Distinct houses require at least one non-house row or column.",
+    "vertical_invariant": "Vertically adjacent house cells are in the same house."
+  }
+}

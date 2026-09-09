@@ -66,10 +66,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument(
         "--heuristic",
-        choices=("wfc", "solver", "uniform", "frequency", "context"),
+        choices=("wfc", "solver", "uniform", "frequency", "context", "skeleton"),
         default="solver",
     )
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--target-houses", type=int, help="skeleton heuristic target")
+    parser.add_argument("--exact-houses", type=int, help="pin unary counter outputs with assumptions")
     parser.add_argument("--selection", choices=("min_entropy", "lexical"), default="min_entropy")
     parser.add_argument("--solver", choices=("cadical195",), default="cadical195")
     parser.add_argument("--watchable", action="store_true", help="use a longer restart interval")
@@ -104,9 +106,12 @@ def solve(args: argparse.Namespace) -> bool:
             "cadical_options": options,
         }
         writer.write(mapping.header(run))
+        target_houses = getattr(args, "target_houses", None)
+        exact_houses = getattr(args, "exact_houses", None)
         observer = DomainObserver(
             mapping, writer.write, heuristic=args.heuristic, seed=args.seed,
             selection=args.selection,
+            target_houses=target_houses if target_houses is not None else exact_houses,
         )
         try:
             with Cadical195(bootstrap_with=clauses, use_timer=True) as solver:
@@ -119,7 +124,20 @@ def solve(args: argparse.Namespace) -> bool:
                 solver.connect_propagator(observer)
                 for placement in mapping.placements:
                     solver.observe(placement.var)
-                result = solver.solve()
+                if mapping.structural:
+                    for kind in ("in", "anchor", "counter"):
+                        for item in mapping.structural.get(kind, []):
+                            solver.observe(int(item["var"]))
+                assumptions: list[int] = []
+                if exact_houses is not None:
+                    outputs = (mapping.structural or {}).get("outputs", {})
+                    count = exact_houses
+                    if count < 0 or (count and str(count) not in outputs) or str(count + 1) not in outputs:
+                        raise ValueError("exact count is outside the compiled counter capacity")
+                    if count:
+                        assumptions.append(int(outputs[str(count)]))
+                    assumptions.append(-int(outputs[str(count + 1)]))
+                result = solver.solve(assumptions=assumptions)
                 stats = solver.accum_stats()
                 stats["time_seconds"] = solver.time()
                 model: list[int] = []

@@ -30,9 +30,10 @@ class DomainObserver(Propagator):
         seed: int = 0,
         selection: str = "min_entropy",
         emit_events: bool = True,
+        target_houses: int | None = None,
     ) -> None:
         super().__init__()
-        if heuristic not in {"solver", "wfc", "uniform", "frequency", "context"}:
+        if heuristic not in {"solver", "wfc", "uniform", "frequency", "context", "skeleton"}:
             raise ValueError(f"unknown heuristic {heuristic!r}")
         if selection not in {"min_entropy", "lexical"}:
             raise ValueError(f"unknown selection heuristic {selection!r}")
@@ -40,9 +41,11 @@ class DomainObserver(Propagator):
         self.emit = emit
         self.emit_events = emit_events
         self.heuristic = heuristic
-        self.decision_heuristic = "frequency" if heuristic == "wfc" else heuristic
+        self.decision_heuristic = "frequency" if heuristic in {"wfc", "skeleton"} else heuristic
         self.selection_heuristic = selection
         self.random = random.Random(seed)
+        self.seed = seed
+        self.target_houses = target_houses
         self.pattern_ids = tuple(item.id for item in mapping.patterns)
         self.pattern_index = {pattern_id: i for i, pattern_id in enumerate(self.pattern_ids)}
         self.weights = tuple(item.frequency for item in mapping.patterns)
@@ -74,6 +77,19 @@ class DomainObserver(Propagator):
         self.undone_assignments = 0
         self.trails: list[list[tuple[int, int, int | None]]] = [[]]
         self.size_trails: list[list[int]] = [[]]
+        self.struct_trails: list[list[tuple[int, bool | None]]] = [[]]
+        self.struct_values: dict[int, bool | None] = {}
+        self.struct_info: dict[int, tuple[str, dict]] = {}
+        if mapping.structural:
+            for kind in ("in", "anchor", "counter"):
+                for item in mapping.structural.get(kind, []):
+                    var = int(item["var"])
+                    self.struct_info[var] = (kind, item)
+                    self.struct_values[var] = None
+        self.in_var_by_cell = {
+            (item["x"], item["y"]): var for var, (kind, item) in self.struct_info.items()
+            if kind == "in"
+        }
         self.var_info: dict[int, tuple[int, int, int, int]] = {}
         self.var_for_cell_pattern: dict[tuple[int, int], int] = {}
         for placement in mapping.placements:
@@ -85,6 +101,17 @@ class DomainObserver(Propagator):
     def on_assignment(self, lit: int, fixed: bool = False) -> None:
         info = self.var_info.get(abs(lit))
         if info is None:
+            structural = self.struct_info.get(abs(lit))
+            if structural is not None:
+                self._ensure_level(self.current_level)
+                var = abs(lit)
+                self.struct_trails[self.current_level].append((var, self.struct_values[var]))
+                self.struct_values[var] = lit > 0
+                kind, item = structural
+                if self.emit_events and kind in {"in", "anchor"}:
+                    self.emit(["i" if kind == "in" else "a", item["x"], item["y"], lit > 0, self.current_level])
+                elif self.emit_events and kind == "counter" and item.get("output"):
+                    self.emit(["c", item["count"], lit > 0, self.current_level])
             return
         cell, x, y, pattern_index = info
         old_domain, old_selected = self.domains[cell], self.selected[cell]
@@ -142,6 +169,10 @@ class DomainObserver(Propagator):
                 undone += 1
             self.trails[level].clear()
             self.size_trails[level].clear()
+            for var, old_value in reversed(self.struct_trails[level]):
+                self.struct_values[var] = old_value
+                undone += 1
+            self.struct_trails[level].clear()
         self.current_level = to
         self.backtrack_events += 1
         self.undone_assignments += undone
@@ -166,6 +197,42 @@ class DomainObserver(Propagator):
     def decide(self) -> int:
         if self.heuristic == "solver":
             return 0
+        if self.heuristic == "skeleton" and self.target_houses is not None:
+            anchors = [(var, item) for var, (kind, item) in self.struct_info.items() if kind == "anchor"]
+            true_items = [item for var, item in anchors if self.struct_values[var] is True]
+            # Re-derive each rectangle from current anchors on every callback.
+            # No plan state survives a backjump.
+            for item in true_items:
+                width = 2 + ((item["x"] * 17 + item["y"] * 7 + self.seed) % 3)
+                height = 3 + ((item["x"] * 5 + item["y"] * 11 + self.seed) % 3)
+                width = min(width, self.mapping.width - item["x"])
+                height = min(height, self.mapping.height - item["y"])
+                for y in range(item["y"], item["y"] + height):
+                    for x in range(item["x"], item["x"] + width):
+                        var = self.in_var_by_cell.get((x, y))
+                        if var and self.struct_values[var] is None:
+                            return var
+                border = (
+                    [(item["x"] - 1, y) for y in range(item["y"], item["y"] + height)]
+                    + [(item["x"] + width, y) for y in range(item["y"], item["y"] + height)]
+                    + [(x, item["y"] - 1) for x in range(item["x"], item["x"] + width)]
+                    + [(x, item["y"] + height) for x in range(item["x"], item["x"] + width)]
+                )
+                for cell in border:
+                    var = self.in_var_by_cell.get(cell)
+                    if var and self.struct_values[var] is None:
+                        return -var
+            if len(true_items) < self.target_houses:
+                viable = [(var, item) for var, item in anchors if self.struct_values[var] is None
+                          and 0 < item["x"] < self.mapping.width - 1
+                          and item["y"] + 2 < self.mapping.height]
+                if viable:
+                    def score(pair):
+                        item = pair[1]
+                        distance = min((abs(item["x"] - other["x"]) + abs(item["y"] - other["y"])
+                                        for other in true_items), default=self.mapping.width + self.mapping.height)
+                        return (-distance, self.random.random())
+                    return min(viable, key=score)[0]
         if self.selection_heuristic == "lexical":
             cell = next(
                 (cell for cell, domain in enumerate(self.domains)
@@ -244,6 +311,7 @@ class DomainObserver(Propagator):
         while len(self.trails) <= level:
             self.trails.append([])
             self.size_trails.append([])
+            self.struct_trails.append([])
 
 
 def _bit_count(value: int) -> int:

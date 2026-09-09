@@ -172,6 +172,13 @@ launches `play_trace.py` with the SAT/CDCL and WFC traces for side-by-side
 visualization. Set `COMPARE_SAT_WFC_NO_PLAYER=1` to generate the files without
 launching the visualizer.
 
+## Kenney Tiny Town structured houses
+
+`experiments/tiny_town/` is a generative SAT experiment for well-formed houses with
+equal-width rows and controllable house counts. It uses declared Kenney tile roles,
+`In` and `Anchor` definitions, CNF cardinality outputs, exact-count assumptions, and
+an optional skeleton-first decision heuristic. See its README for the one-command run.
+
 ## Future Work
 
 * Larger pattern sizes

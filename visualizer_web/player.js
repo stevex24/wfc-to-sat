@@ -11,6 +11,7 @@ class Replay {
     this.full = this.patterns.map(p => p.id);
     this.domains = Array.from({length: this.width * this.height}, () => this.full.slice());
     this.selected = Array(this.domains.length).fill(null); this.level = 0; this.trails = [[]];
+    this.inside = Array(this.domains.length).fill(null); this.anchors = Array(this.domains.length).fill(null); this.counter = new Map(); this.structTrails = [[]];
     this.undo = []; this.conflicts = 0; this.restarts = 0; this.terminal = 'running'; this.stats = {};
     this.flash = new Set(); this.flashPower = 0;
     this.blendCache = new Map();
@@ -27,12 +28,18 @@ class Replay {
       while (this.trails.length <= event[4]) this.trails.push([]);
       const record = {cell, oldDomain, oldSelected, newDomain: next.slice(), newSelected: nextSelected};
       this.trails[event[4]].push(record); this.domains[cell] = next; this.selected[cell] = nextSelected; undo.record = record; undo.level = event[4];
+    } else if (type === 'i' || type === 'a' || type === 'c') {
+      const level=event[4]??event[3], key=type==='c'?event[1]:this.cell(event[1],event[2]);
+      while(this.structTrails.length<=level)this.structTrails.push([]);
+      const target=type==='i'?this.inside:type==='a'?this.anchors:this.counter, old=target instanceof Map?target.get(key):target[key], value=type==='c'?event[2]:event[3];
+      const record={type,key,old,value};this.structTrails[level].push(record);if(target instanceof Map)target.set(key,value);else target[key]=value;undo.record=record;undo.level=level;
     } else if (type === 'b') {
       undo.oldLevel = this.level; undo.removed = [];
       this.flash = new Set();
       for (let level = this.level; level > event[1]; level--) {
         const records = this.trails[level].splice(0); undo.removed.push([level, records]);
         for (let i = records.length - 1; i >= 0; i--) { const r = records[i]; this.domains[r.cell] = r.oldDomain.slice(); this.selected[r.cell] = r.oldSelected; this.flash.add(r.cell); }
+        const structs=this.structTrails[level]?.splice(0)||[];undo.removed.push(['s',level,structs]);for(let i=structs.length-1;i>=0;i--)this.setStruct(structs[i],structs[i].old);
       }
       this.level = event[1]; this.conflicts++; this.flashPower = Math.min(1, .2 + Math.log2(event[2] + 1) / 10);
     } else if (type === 'r') { this.restarts++; }
@@ -43,12 +50,14 @@ class Replay {
     if (!this.cursor) return false; const index = --this.cursor, undo = this.undo[index], event = this.events[index];
     if (undo.type === 'l') this.level = undo.level;
     else if (undo.type === 'p' || undo.type === 'n') { const r = this.trails[undo.level].pop(); this.domains[r.cell] = r.oldDomain.slice(); this.selected[r.cell] = r.oldSelected; }
-    else if (undo.type === 'b') { for (let i = undo.removed.length - 1; i >= 0; i--) { const [level, records] = undo.removed[i]; this.trails[level].push(...records); for (const r of records) { this.domains[r.cell] = r.newDomain.slice(); this.selected[r.cell] = r.newSelected; } } this.level = undo.oldLevel; this.conflicts--; this.flash.clear(); }
+    else if (undo.type === 'i' || undo.type === 'a' || undo.type === 'c') { const r=this.structTrails[undo.level].pop();this.setStruct(r,r.old); }
+    else if (undo.type === 'b') { for (let i = undo.removed.length - 1; i >= 0; i--) { const entry=undo.removed[i];if(entry[0]==='s'){const [,level,records]=entry;this.structTrails[level].push(...records);for(const r of records)this.setStruct(r,r.value);continue;} const [level, records] = entry; this.trails[level].push(...records); for (const r of records) { this.domains[r.cell] = r.newDomain.slice(); this.selected[r.cell] = r.newSelected; } } this.level = undo.oldLevel; this.conflicts--; this.flash.clear(); }
     else if (undo.type === 'r') this.restarts--;
     else if (undo.type === 'e') { this.terminal = undo.terminal; this.stats = undo.stats; }
     return true;
   }
   seek(fraction) { const target = Math.round(fraction * this.events.length); while (this.cursor < target) this.apply(); while (this.cursor > target) this.back(); }
+  setStruct(r,value){const target=r.type==='i'?this.inside:r.type==='a'?this.anchors:this.counter;if(target instanceof Map){if(value===undefined)target.delete(r.key);else target.set(r.key,value);}else target[r.key]=value;}
 }
 
 function decode(encoded) { const raw = atob(encoded), bytes = new Uint8Array(raw.length); for (let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i); return bytes; }
@@ -72,13 +81,13 @@ function render() {
   const gap = replays.length === 2 ? 26 : 0, panelWidth = (canvas.width - gap) / replays.length;
   replays.forEach((replay, i) => drawReplay(replay, i * (panelWidth + gap), 0, panelWidth, canvas.height));
   const progress = replays.reduce((n,r)=>n+r.cursor/r.events.length,0)/replays.length; controls.scrub.value = Math.round(progress*1000);
-  controls.status.textContent = replays.map(r => { const exact=r.terminal!=='running'&&r.stats.conflicts!==undefined?` / exact ${r.stats.conflicts}`:''; return `${r.name}  ${r.cursor.toLocaleString()}/${r.events.length.toLocaleString()}  L${r.level}  conflicts* ${r.conflicts}${exact}  restarts ${r.restarts}  ${r.terminal.toUpperCase()}`; }).join('\n');
+  controls.status.textContent = replays.map(r => { const exact=r.terminal!=='running'&&r.stats.conflicts!==undefined?` / exact ${r.stats.conflicts}`:''; const houses=[...r.counter].filter(([,v])=>v).reduce((m,[n])=>Math.max(m,n),0); return `${r.name}  ${r.cursor.toLocaleString()}/${r.events.length.toLocaleString()}  houses ${houses}  L${r.level}  conflicts* ${r.conflicts}${exact}  restarts ${r.restarts}  ${r.terminal.toUpperCase()}`; }).join('\n');
 }
 
 function drawReplay(r, px, py, pw, ph) {
   const titleH=38, pad=16, cell=Math.min((pw-pad*2)/r.width,(ph-titleH-pad*2)/r.height), ox=px+(pw-r.width*cell)/2, oy=py+titleH+(ph-titleH-r.height*cell)/2;
   ctx.fillStyle='#d9e8f8'; ctx.font=`${Math.max(13,canvas.width/90)}px ui-monospace, monospace`; ctx.textAlign='center'; ctx.fillText(`${r.name} · ${r.header.run.heuristic}`,px+pw/2,25);
-  for(let y=0;y<r.height;y++) for(let x=0;x<r.width;x++){ const index=r.cell(x,y), domain=r.domains[index]; drawCell(r,domain,r.selected[index],ox+x*cell,oy+y*cell,cell); if(r.flash.has(index)){ctx.fillStyle=`rgba(255,70,45,${.55*r.flashPower})`;ctx.fillRect(ox+x*cell,oy+y*cell,cell,cell);} }
+  for(let y=0;y<r.height;y++) for(let x=0;x<r.width;x++){ const index=r.cell(x,y), domain=r.domains[index]; drawCell(r,domain,r.selected[index],ox+x*cell,oy+y*cell,cell); if(r.inside[index]===true){ctx.fillStyle='rgba(55,190,255,.18)';ctx.fillRect(ox+x*cell,oy+y*cell,cell,cell);}if(r.anchors[index]===true){ctx.strokeStyle='#ffe66d';ctx.lineWidth=Math.max(2,cell/12);ctx.strokeRect(ox+x*cell+2,oy+y*cell+2,cell-4,cell-4);} if(r.flash.has(index)){ctx.fillStyle=`rgba(255,70,45,${.55*r.flashPower})`;ctx.fillRect(ox+x*cell,oy+y*cell,cell,cell);} }
   r.flashPower*=.92; if(r.flashPower<.02)r.flash.clear();
 }
 
