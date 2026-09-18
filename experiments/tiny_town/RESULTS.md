@@ -13,18 +13,24 @@ Result: SAT with exactly three separated, equal-width houses. Each house has one
 roof row, one to three lower-roof rows, and at least one body row. Tile style families
 remain consistent within each house.
 
+After the follow-up fixes, each house also has a door on its final body row,
+upper body rows cannot contain doors, and roof tiles with a dark right edge
+appear only next to the gable. A freshly generated 12×10, exact-three map was
+independently checked for bottom-row doors and roof-edge placement.
+
 ## Section 9 verification
 
 | Test | Result |
 |---|---|
 | `In` definition, both directions | Pass |
 | Hand-forced ragged house | UNSAT (pass) |
-| Flood-filled components = true anchors, 5 seeds | Pass |
-| Exactly three houses, 5 seeds | Pass |
+| Flood-filled components = true anchors, 10 seeds plus exact counts 1–3 | Pass |
+| Exactly three houses, 20 seeds plus 10 further seeds | Pass |
 | More houses than fit on a 5×4 grid | Clean UNSAT (pass) |
+| Bottom-row door required; door forbidden above the bottom | Pass |
+| Gable-edge roof sprites cannot occur mid-roof; tiers cannot mix | Pass |
 
-The focused suite contains 38 passing checks (individual house-tile implications are
-parameterized by assertion). A repository-wide run excluding the pre-existing trace
+The focused suite now contains 52 passing cases. A repository-wide run excluding the pre-existing trace
 fixture test passes. The excluded test refers to absent `examples/visualizer/pipes-*`
 files on this branch.
 

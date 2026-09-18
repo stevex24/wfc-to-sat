@@ -4,6 +4,11 @@ This is a generative structure experiment, not an object detector. It compiles K
 Tiny Town tile roles, row grammar, equal-width constraints, house anchors, and a unary
 cardinality counter into one CNF instance.
 
+Each house has at least one door on its lowest body row, and door sprites are
+forbidden on higher body rows. Door-opening sprites must align with doors below.
+Roof sprites with a dark gable edge appear only immediately before the right
+roof end, so the dark edge cannot form a stripe in the middle of a roof.
+
 ```bash
 python -m pip install -r requirements.txt
 python experiments/tiny_town/house_experiment.py \

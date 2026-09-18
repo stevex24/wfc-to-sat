@@ -14,6 +14,9 @@ class TileManifest:
     roles: dict[str, tuple[int, ...]]
     house_tiles: frozenset[int]
     style_family: dict[int, str]
+    door_tiles: frozenset[int]
+    door_opening_tiles: frozenset[int]
+    roof_gable_edge_tiles: frozenset[int]
 
     @classmethod
     def load(cls, path: str | Path) -> "TileManifest":
@@ -26,7 +29,16 @@ class TileManifest:
         style_family = {tile: name for name, ids in value.get("style_families", {}).items() for tile in ids}
         if any(tile not in style_family for tile in house):
             raise ValueError("every house tile needs a style family")
-        return cls(tile_roles, roles, house, style_family)
+        doors = frozenset(value.get("door_tiles", ()))
+        openings = frozenset(value.get("door_opening_tiles", ()))
+        if not doors or not doors <= set(roles["body_inside"]):
+            raise ValueError("door tiles must be body interiors")
+        if not openings <= set(roles["body_inside"]) or doors & openings:
+            raise ValueError("door openings must be separate body interiors")
+        edges = frozenset(value.get("roof_gable_edge_tiles", ()))
+        if not edges <= set(roles["roof_top_inside"] + roles["roof_inside"]):
+            raise ValueError("gable-edge tiles must be roof interiors")
+        return cls(tile_roles, roles, house, style_family, doors, openings, edges)
 
 
 class HouseCnf:
@@ -44,6 +56,8 @@ class HouseCnf:
         self.anchor_base = self.in_base + self.cells
         self.counter_base = self.anchor_base + self.cells
         self.next_var = self.counter_base + self.cells * counter_limit
+        self.door_seen_base = self.next_var
+        self.next_var += self.cells
         self.clauses: list[list[int]] = []
 
     @property
@@ -63,6 +77,10 @@ class HouseCnf:
         """prefix is 1..cells and count is 1..counter_limit."""
         return self.counter_base + (prefix - 1) * self.counter_limit + count - 1
 
+    def door_seen(self, x: int, y: int) -> int:
+        """Whether the current body row has seen a door since its left edge."""
+        return self.door_seen_base + y * self.width + x
+
     def add(self, *lits: int) -> None:
         self.clauses.append(list(lits))
 
@@ -72,6 +90,7 @@ class HouseCnf:
         self._exactly_one_tiles()
         self._define_inside()
         self._house_grammar()
+        self._doors()
         self._equal_width()
         self._define_anchors()
         self._define_counter()
@@ -121,6 +140,20 @@ class HouseCnf:
                     all_tiles = set(self.tiles)
                     allowed_left = all_tiles if tile in ground else (ground if tile in left else left | middle)
                     allowed_right = all_tiles if tile in ground else (ground if tile in right else middle | right)
+                    # The last roof-interior sprite has a dark right edge. It
+                    # belongs immediately before the gable, never mid-roof.
+                    if tile in self.manifest.roof_gable_edge_tiles:
+                        allowed_right &= right
+                    if tile not in ground:
+                        if tile in top:
+                            allowed_left &= ground | top
+                            allowed_right &= ground | top
+                        elif tile in roof:
+                            allowed_left &= ground | roof
+                            allowed_right &= ground | roof
+                        else:
+                            allowed_left &= ground | body
+                            allowed_right &= ground | body
                     allowed_left, allowed_right = styled(tile, allowed_left), styled(tile, allowed_right)
                     if x == 0 and tile not in ground: self.add(-var)
                     elif x > 0: self.clauses.append([-var, *[self.assign(x - 1, y, t) for t in allowed_left]])
@@ -152,6 +185,53 @@ class HouseCnf:
             for x in range(self.width):
                 for choices in _product_vars(self, x, range(y, y + 4), roof):
                     self.clauses.append([-v for v in choices])
+
+    def _doors(self) -> None:
+        r = self.manifest.roles
+        ground = set(r["ground"])
+        body_right = set(r["body_right"])
+        body_middle = set(r["body_inside"])
+        doors = set(self.manifest.door_tiles)
+        openings = set(self.manifest.door_opening_tiles)
+        for y in range(self.height):
+            for x in range(self.width):
+                seen = self.door_seen(x, y)
+                door_vars = [self.assign(x, y, t) for t in doors]
+                middle_vars = [self.assign(x, y, t) for t in body_middle]
+                # seen <-> door here OR (body interior here AND seen left).
+                for door in door_vars:
+                    self.add(-door, seen)
+                if x:
+                    previous = self.door_seen(x - 1, y)
+                    for middle in middle_vars:
+                        self.add(-middle, -previous, seen)
+                    self.clauses.append([-seen, *door_vars, previous])
+                    self.clauses.append([-seen, *middle_vars])
+                else:
+                    self.clauses.append([-seen, *door_vars])
+                for door in door_vars:
+                    if y + 1 < self.height:
+                        self.clauses.append([-door, *[self.assign(x, y + 1, t) for t in ground]])
+                # An open doorway is the upper half of a door and must align.
+                for opening in openings:
+                    if y + 1 == self.height:
+                        self.add(-self.assign(x, y, opening))
+                    else:
+                        family = self.manifest.style_family[opening]
+                        matching = [t for t in doors if self.manifest.style_family[t] == family]
+                        self.clauses.append([-self.assign(x, y, opening),
+                                             *[self.assign(x, y + 1, t) for t in matching]])
+                # A bottom body row must contain a door before its right edge.
+                for right in body_right:
+                    end = self.assign(x, y, right)
+                    if x == 0:
+                        continue
+                    if y + 1 == self.height:
+                        self.add(-end, self.door_seen(x - 1, y))
+                    else:
+                        for tile in ground:
+                            self.add(-end, -self.assign(x, y + 1, tile),
+                                     self.door_seen(x - 1, y))
 
     def _equal_width(self) -> None:
         for y in range(self.height - 1):
@@ -207,7 +287,8 @@ class HouseCnf:
                 "assign": {"first": self.assign_base, "last": self.in_base - 1, "formula": "first + (y*W+x)*T + tile_index"},
                 "in": {"first": self.in_base, "last": self.anchor_base - 1, "formula": "first + y*W+x"},
                 "anchor": {"first": self.anchor_base, "last": self.counter_base - 1, "formula": "first + y*W+x"},
-                "counter": {"first": self.counter_base, "last": self.num_vars, "formula": "first + (prefix-1)*K + count-1"}
+                "counter": {"first": self.counter_base, "last": self.door_seen_base - 1, "formula": "first + (prefix-1)*K + count-1"},
+                "door_seen": {"first": self.door_seen_base, "last": self.num_vars, "formula": "first + y*W+x"}
             },
             "in": [{"var": self.inside(x, y), "x": x, "y": y} for y in range(self.height) for x in range(self.width)],
             "anchor": [{"var": self.anchor(x, y), "x": x, "y": y} for y in range(self.height) for x in range(self.width)],

@@ -63,7 +63,7 @@ def decoded(cnf, model):
 
 
 @pytest.mark.parametrize("seed", range(10))
-def test_anchor_count_matches_flood_fill(seed):
+def test_anchor_count_matches_flood_fill_across_seeds(seed):
     cnf = built(10, 9, 1, 3)
     clauses = list(cnf.clauses)
     __import__("random").Random(seed).shuffle(clauses)
@@ -124,3 +124,31 @@ def test_exact_count_counter_outputs_are_assumable():
     assert model is not None
     positive = {lit for lit in model if lit > 0}
     assert sum(cnf.anchor(x, y) in positive for y in range(cnf.height) for x in range(cnf.width)) == 3
+
+
+def test_house_requires_a_door_on_its_bottom_body_row():
+    cnf = built(8, 6, 1, 1)
+    # A complete 3-wide house at x=2..4, with one roof and one body row.
+    row = [(2, 0, 48), (3, 0, 50), (4, 0, 51),
+           (2, 1, 60), (3, 1, 62), (4, 1, 63),
+           (2, 2, 76), (3, 2, 77), (4, 2, 79)]
+    ground_below = [cnf.assign(x, 3, 0) for x in (2, 3, 4)]
+    assert sat(cnf, [cnf.assign(x, y, tile) for x, y, tile in row] + ground_below) is None
+    row[-2] = (3, 2, 89)
+    assert sat(cnf, [cnf.assign(x, y, tile) for x, y, tile in row] + ground_below) is not None
+
+
+def test_upper_body_door_cannot_have_another_body_row_below():
+    cnf = built(8, 7, 1, 1)
+    assert sat(cnf, [cnf.assign(3, 3, 89), cnf.assign(3, 4, 77)]) is None
+
+
+def test_roof_gable_edge_tile_must_be_next_to_right_roof_end():
+    cnf = built(8, 6, 1, 1)
+    assert sat(cnf, [cnf.assign(3, 0, 50), cnf.assign(4, 0, 49)]) is None
+    assert sat(cnf, [cnf.assign(3, 0, 50), cnf.assign(4, 0, 51)]) is not None
+
+
+def test_roof_top_and_lower_roof_cannot_mix_in_one_row():
+    cnf = built(8, 6, 1, 1)
+    assert sat(cnf, [cnf.assign(2, 0, 48), cnf.assign(3, 0, 61)]) is None

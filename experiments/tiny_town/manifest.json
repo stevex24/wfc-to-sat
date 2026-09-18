@@ -21,6 +21,9 @@
     "roof_left", "roof_inside", "roof_right",
     "body_left", "body_inside", "body_right"
   ],
+  "door_tiles": [85, 89],
+  "door_opening_tiles": [74, 78],
+  "roof_gable_edge_tiles": [50, 54, 62, 66],
   "style_families": {
     "cool": [48, 49, 50, 51, 60, 61, 62, 63, 76, 77, 78, 79, 88, 89],
     "warm": [52, 53, 54, 55, 64, 65, 66, 67, 72, 73, 74, 75, 84, 85]
@@ -28,6 +31,8 @@
   "notes": {
     "roof_overhang": "None at tile-grid scale: roof and body use the same left/right columns.",
     "separation": "Distinct houses require at least one non-house row or column.",
-    "vertical_invariant": "Vertically adjacent house cells are in the same house."
+    "vertical_invariant": "Vertically adjacent house cells are in the same house.",
+    "door_tiles": "85 and 89 show the door. 74 and 78 are the open top of a doorway.",
+    "roof_gable_edge_tiles": "50, 54, 62 and 66 have a dark right border and belong only immediately before a gable."
   }
 }
