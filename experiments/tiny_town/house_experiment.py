@@ -77,7 +77,7 @@ def render(cnf: HouseCnf, model: list[int], destination: Path) -> None:
     image = Image.new("RGBA", (cnf.width * 16 * scale, cnf.height * 16 * scale + margin), "#17202a")
     for y, row in enumerate(tiles):
         for x, tile in enumerate(row):
-            sprite = Image.open(assets / f"tile_{tile:04d}.png").convert("RGBA").resize((16 * scale, 16 * scale), Image.Resampling.NEAREST)
+            sprite = Image.open(assets / f"tile_{tile:04d}.png").convert("RGBA").resize((16 * scale, 16 * scale), Image.NEAREST)
             image.alpha_composite(sprite, (x * 16 * scale, y * 16 * scale))
     draw = ImageDraw.Draw(image)
     for x, y in anchors:
